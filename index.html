@@ -322,8 +322,17 @@ async function apiOnce(params, hash) {
   const p = { ...params, pwHash: hash || PW };
   const qs = Object.entries(p).map(([k,v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&');
   let text, status = 0;
-  try { const res = await fetch(API + '?' + qs, { redirect:'follow' }); status = res.status; text = await res.text(); }
-  catch(e) { const er = new Error('連不上 Google（網路中斷或切換了 App）'); er.retry = true; throw er; }
+  const isRead = READ_ACTIONS.includes(params.action) || params.action === 'bootstrap' || params.action === 'ping';
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), isRead ? 25000 : 45000);
+  try { const res = await fetch(API + '?' + qs, { redirect:'follow', signal: ctrl.signal }); status = res.status; text = await res.text(); }
+  catch(e) {
+    const timeout = e.name === 'AbortError';
+    const er = new Error(timeout
+      ? (isRead ? 'Google 超過 25 秒沒有回應' : 'Google 超過 45 秒沒有回應，資料可能已經寫入，請先按同步確認，不要重複儲存')
+      : '連不上 Google（網路中斷或切換了 App）');
+    er.retry = isRead; throw er;
+  } finally { clearTimeout(timer); }
   let d;
   try { d = JSON.parse(text); }
   catch(e) {
@@ -347,6 +356,18 @@ const getAll = (sheet, hash) => api({ action:'getAll', sheet }, hash).then(d => 
 const addRow = (sheet, fields) => api({ action:'addRow', sheet, fields: JSON.stringify(fields) });
 const updRow = (sheet, rowIndex, fields) => api({ action:'updateRow', sheet, rowIndex, fields: JSON.stringify(fields) });
 const delRow = (sheet, rowIndex) => api({ action:'deleteRow', sheet, rowIndex });
+
+/* ================= 存檔後直接更新本機資料（不重讀整張表） ================= */
+function shiftAfterDelete(list, rowIndex) {
+  const out = list.filter(r => r._rowIndex !== rowIndex);
+  out.forEach(r => { if (r._rowIndex > rowIndex) r._rowIndex--; });
+  return out;
+}
+function nextRowIndex(list, res) {
+  const n = res && parseInt(res.rowIndex, 10);
+  return n > 1 ? n : Math.max(1, ...list.map(r => r._rowIndex || 0)) + 1;
+}
+function afterLocalChange() { saveCache(); renderAll(); }
 
 /* ================= 登入與載入 ================= */
 function requireLogin() {
@@ -611,8 +632,9 @@ async function deleteLine(rowIndex) {
   if (!confirm(`刪除「${r['客戶資料']}／${r['品項']}」這一列？刪除後無法復原。`)) return;
   try {
     await delRow(SH.orders, rowIndex);
+    DB.orders = shiftAfterDelete(DB.orders, rowIndex);
     closeSheet(); toast('已刪除');
-    await refreshAll();   // 刪除會讓下方列號位移，必須重新讀取
+    afterLocalChange();
   } catch(e) { toast('刪除失敗：' + e.message); }
 }
 
@@ -742,23 +764,30 @@ async function saveOrder() {
     for (let i = 0; i < lines.length; i++) {
       const L = lines[i], first = i === 0, c = lineCalc(L, first);
       btn.textContent = lines.length > 1 ? `儲存中 ${i+1}/${lines.length}…` : '儲存中…';
-      await addRow(SH.orders, {
+      const row = {
         '訂單ID': id, '日期': DRAFT.date || today(), '客戶資料': cust, '品項': L.item.trim(),
         '價位': num(L.price), '斤數': num(L.qty), '總金額': Math.round(c.total), '產品編號': L.pid.trim(),
         '單斤成本': num(L.cost), '茶葉*斤數成本': Math.round(c.leafCost * 100) / 100,
         '茶葉消耗': L.bag ? 0 : num(L.leaf), '烘焙': L.bag ? 0 : num(L.roast), '脫氧+鋁袋': L.bag ? 0 : num(L.deox),
         '箱子': first ? num(DRAFT.box) : 0, '運費': first ? num(DRAFT.ship) : 0, '手續費': first ? num(DRAFT.fee) : 0,
         '淨利': Math.round(c.profit * 10) / 10, '備註': first ? DRAFT.note.trim() : '', '訂單狀態': DRAFT.status,
-      });
+      };
+      const res = await addRow(SH.orders, row);
+      DB.orders.push({ ...row, _rowIndex: nextRowIndex(DB.orders, res) });
       done++;
     }
     // 新客戶自動建檔
     if (!DB.customers.some(x => x['客戶姓名'] === cust)) {
-      try { await addRow(SH.cust, { 'ID': rid(), '客戶姓名': cust, '建檔日期': today() }); } catch(e) {}
+      try {
+        const crow = { 'ID': rid(), '客戶姓名': cust, '建檔日期': today() };
+        const res = await addRow(SH.cust, crow);
+        DB.customers.push({ ...crow, _rowIndex: nextRowIndex(DB.customers, res) });
+      } catch(e) {}
     }
     closeSheet(); toast(`已儲存 ${done} 個品項`);
-    await refreshAll();
+    afterLocalChange();
   } catch(e) {
+    if (done) afterLocalChange();
     btn.disabled = false; btn.textContent = '儲存訂單';
     if (done) { DRAFT.lines = DRAFT.lines.filter(L => !lines.slice(0, done).includes(L)); renderLines(); }
     toast((done ? `前 ${done} 個已存，` : '') + '儲存失敗：' + e.message);
@@ -895,19 +924,20 @@ async function saveCustomer(rowIndex) {
   ['電話','Line名稱','地址','口味偏好/備註'].forEach(k => data[k] = $('c_' + k).value.trim());
   const b = $('cSave'); b.disabled = true; b.textContent = '儲存中…';
   try {
-    rowIndex ? await updRow(SH.cust, rowIndex, data) : await addRow(SH.cust, data);
+    if (rowIndex) { await updRow(SH.cust, rowIndex, data); Object.assign(old, data); }
+    else { const res = await addRow(SH.cust, data); DB.customers.push({ ...data, _rowIndex: nextRowIndex(DB.customers, res) }); }
     closeSheet(); toast('已儲存客戶');
-    DB.customers = (await getAll(SH.cust)).filter(r => String(r['客戶姓名'] || '').trim());
-    saveCache(); renderCustomers();
+    afterLocalChange();
   } catch(e) { b.disabled = false; b.textContent = '儲存客戶'; toast('儲存失敗：' + e.message); }
 }
 async function deleteCustomer(rowIndex) {
   const c = DB.customers.find(x => x._rowIndex === rowIndex);
   if (!confirm(`刪除客戶「${c ? c['客戶姓名'] : ''}」？訂單紀錄不會被刪除。`)) return;
   try {
-    await delRow(SH.cust, rowIndex); closeSheet(); toast('已刪除');
-    DB.customers = (await getAll(SH.cust)).filter(r => String(r['客戶姓名'] || '').trim());
-    saveCache(); renderCustomers();
+    await delRow(SH.cust, rowIndex);
+    DB.customers = shiftAfterDelete(DB.customers, rowIndex);
+    closeSheet(); toast('已刪除');
+    afterLocalChange();
   } catch(e) { toast('刪除失敗：' + e.message); }
 }
 
@@ -1016,14 +1046,15 @@ async function savePurchase(rowIndex) {
   if (!data['品項'] || !data['斤數']) { toast('請填品項與斤數'); return; }
   const b = $('bSave'); b.disabled = true; b.textContent = '儲存中…';
   try {
-    rowIndex ? await updRow(SH.buy, rowIndex, data) : await addRow(SH.buy, data);
+    if (rowIndex) { await updRow(SH.buy, rowIndex, data); Object.assign(DB.purchases.find(r => r._rowIndex === rowIndex) || {}, data); }
+    else { const res = await addRow(SH.buy, data); DB.purchases.push({ ...data, _rowIndex: nextRowIndex(DB.purchases, res) }); }
     closeSheet(); toast('已儲存進貨');
-    setPurchases(await getAll(SH.buy)); saveCache(); renderPurchases();
+    afterLocalChange();
   } catch(e) { b.disabled = false; b.textContent = '儲存進貨'; toast('儲存失敗：' + e.message); }
 }
 async function deletePurchase(rowIndex) {
   if (!confirm('刪除這筆進貨紀錄？')) return;
-  try { await delRow(SH.buy, rowIndex); closeSheet(); toast('已刪除'); setPurchases(await getAll(SH.buy)); saveCache(); renderPurchases(); }
+  try { await delRow(SH.buy, rowIndex); DB.purchases = shiftAfterDelete(DB.purchases, rowIndex); closeSheet(); toast('已刪除'); afterLocalChange(); }
   catch(e) { toast('刪除失敗：' + e.message); }
 }
 
