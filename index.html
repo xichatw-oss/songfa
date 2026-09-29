@@ -2,1587 +2,1027 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>崧發茶園 管理系統</title>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#24533F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>崧發茶園</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --bg:#F7F4EF;
-  --bg2:#EDE8E0;
-  --card:#FFFFFF;
-  --border:#D9D2C5;
-  --text:#2C2416;
-  --text2:#7A6E5F;
-  --text3:#B0A898;
-  --green:#2D6A4F;
-  --green-l:#E8F3EE;
-  --green-t:#1B4332;
-  --amber:#8B5E00;
-  --amber-l:#FDF3DC;
-  --red:#8B1A1A;
-  --red-l:#FDEAEA;
-  --radius:10px;
-  --radius-lg:16px;
+  --leaf:#24533F; --leaf-d:#173A2B; --leaf-l:#E4EFE8; --leaf-m:#9BC2AC;
+  --paper:#F6F3EC; --paper-2:#ECE6DA; --card:#FFFFFF; --line:#DDD5C6;
+  --ink:#27231B; --ink-2:#6F665A; --ink-3:#A89F90;
+  --gold:#8A6516; --gold-l:#F8EFD9; --red:#9B2C22; --red-l:#FBE9E6;
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
-.app{max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;background:var(--paper);color:var(--ink);font-size:15px;line-height:1.5}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,select,textarea{font:inherit;color:var(--ink)}
+.num{font-variant-numeric:tabular-nums}
+.app{max-width:520px;margin:0 auto;min-height:100%;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 
-/* Topbar */
-.topbar{background:var(--green);padding:14px 16px 0;position:sticky;top:0;z-index:50;}
-.topbar-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.topbar-logo{display:flex;align-items:center;gap:8px;}
-.topbar-leaf{font-size:20px;}
-.topbar-name{font-size:17px;font-weight:600;color:#fff;letter-spacing:.5px;}
-.topbar-sub{font-size:11px;color:rgba(255,255,255,.6);}
-.sync-btn{background:rgba(255,255,255,.15);border:none;border-radius:20px;padding:5px 12px;color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:4px;}
-.sync-btn:active{background:rgba(255,255,255,.25);}
-.tab-row{display:flex;}
-.tab{flex:1;text-align:center;padding:9px 2px 8px;font-size:12px;color:rgba(255,255,255,.6);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
-.tab.active{color:#fff;border-bottom-color:#fff;font-weight:500;}
+/* 頂部 */
+.top{position:sticky;top:0;z-index:20;background:var(--leaf);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 16px 12px;display:flex;align-items:center;gap:10px}
+.top h1{font-size:18px;font-weight:700;letter-spacing:.5px;flex:1}
+.top .sync{font-size:11px;color:var(--leaf-m);margin-right:2px}
+.icon-b{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.12)}
+.icon-b svg{width:18px;height:18px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.icon-b.spin svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* Content */
-.content{flex:1;padding:14px 12px;display:none;}
-.content.active{display:block;}
+/* 底部導覽 */
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.nav-in{max-width:520px;margin:0 auto;display:flex}
+.nav button{flex:1;padding:8px 0 7px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--ink-3)}
+.nav svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav button.on{color:var(--leaf);font-weight:600}
 
-/* Loading */
-.loading{text-align:center;padding:40px 20px;color:var(--text2);}
-.loading-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.2s infinite;}
-.loading-dot:nth-child(2){animation-delay:.2s;margin:0 4px;}
-.loading-dot:nth-child(3){animation-delay:.4s;}
-@keyframes pulse{0%,80%,100%{opacity:.2;transform:scale(.8);}40%{opacity:1;transform:scale(1);}}
-.error-box{background:var(--red-l);border:1px solid #f5c6c6;border-radius:var(--radius);padding:12px;margin:8px 0;font-size:13px;color:var(--red);}
+.page{display:none;padding:14px 14px 20px}
+.page.on{display:block}
+.sec-t{font-size:13px;font-weight:600;color:var(--ink-2);margin:18px 2px 8px;display:flex;justify-content:space-between;align-items:baseline}
+.sec-t a{font-weight:400;color:var(--leaf);font-size:13px}
 
-/* Stat cards */
-.stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:12px;}
-.stat-card{background:var(--card);border-radius:var(--radius);padding:12px;border:1px solid var(--border);}
-.stat-label{font-size:11px;color:var(--text2);margin-bottom:4px;}
-.stat-value{font-size:22px;font-weight:600;color:var(--text);}
-.stat-sub{font-size:11px;color:var(--text3);margin-top:2px;}
-.stat-value.green{color:var(--green);}
-.stat-value.amber{color:var(--amber);}
-.stat-value.red{color:var(--red);}
+/* 總覽 */
+.hero{background:var(--leaf-d);color:#fff;border-radius:18px;padding:18px 18px 16px}
+.hero .lbl{font-size:12px;color:var(--leaf-m)}
+.hero .big{font-size:34px;font-weight:700;line-height:1.15;margin:2px 0 10px}
+.hero-row{display:flex;gap:18px;border-top:1px solid rgba(255,255,255,.14);padding-top:10px}
+.hero-row div{flex:1}
+.hero-row b{display:block;font-size:17px}
+.cta{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:12px;padding:15px;border-radius:14px;background:var(--gold);color:#fff;font-size:16px;font-weight:700}
+.cta svg{width:20px;height:20px;stroke:#fff;stroke-width:2.4;fill:none;stroke-linecap:round}
+.bars{background:var(--card);border-radius:14px;padding:14px 12px 10px;display:flex;align-items:flex-end;gap:8px;height:150px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}
+.bar .stack{width:100%;max-width:34px;display:flex;flex-direction:column;justify-content:flex-end;flex:1}
+.bar .rv{background:var(--leaf-l);border-radius:6px 6px 0 0;position:relative}
+.bar .pf{background:var(--leaf);border-radius:0 0 3px 3px}
+.bar span{font-size:10px;color:var(--ink-3)}
+.bar em{font-style:normal;font-size:10px;color:var(--ink-2)}
+.legend{font-size:11px;color:var(--ink-3);margin:6px 2px 0;display:flex;gap:12px}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
 
-/* Chart */
-.chart-card{background:var(--card);border-radius:var(--radius-lg);border:1px solid var(--border);padding:14px;margin-bottom:10px;}
-.chart-title{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:10px;}
-.month-chart{display:flex;align-items:flex-end;gap:5px;height:80px;}
-.month-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
-.month-bar{width:100%;border-radius:3px 3px 0 0;}
-.month-lbl{font-size:9px;color:var(--text3);}
-.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-.bar-lbl{font-size:11px;color:var(--text2);width:70px;text-align:right;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.bar-bg{flex:1;height:18px;background:var(--bg2);border-radius:4px;overflow:hidden;}
-.bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;padding-left:6px;}
-.bar-val{font-size:10px;font-weight:500;color:#fff;}
-.donut-row{display:flex;align-items:center;gap:16px;}
-.legend{flex:1;display:flex;flex-direction:column;gap:6px;}
-.leg-item{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
-.leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+/* 列表卡片 */
+.list{background:var(--card);border-radius:14px;overflow:hidden}
+.row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--paper-2);width:100%;text-align:left}
+.row:last-child{border-bottom:0}
+.row .m{flex:1;min-width:0}
+.row .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .s{font-size:12px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .r{text-align:right;flex-shrink:0}
+.row .r b{display:block;font-size:15px}
+.row .r small{font-size:12px;color:var(--leaf)}
+.row .r small.neg{color:var(--red)}
+.month-h{font-size:12px;color:var(--ink-3);margin:16px 4px 6px;display:flex;justify-content:space-between}
+.tag{display:inline-block;font-size:11px;padding:1px 7px;border-radius:20px;vertical-align:1px;margin-left:4px;font-weight:500}
+.tag.w{background:var(--gold-l);color:var(--gold)}
+.tag.x{background:var(--red-l);color:var(--red)}
+.tag.b{background:var(--leaf-l);color:var(--leaf)}
 
-/* Search */
-.search-wrap{display:flex;gap:8px;margin-bottom:10px;}
-.search-wrap input{flex:1;padding:9px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--card);font-size:13px;color:var(--text);outline:none;}
-.search-wrap input:focus{border-color:var(--green);}
+.search{display:flex;gap:8px;margin-bottom:10px}
+.search input{flex:1;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-size:15px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:6px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:6px 13px;border-radius:20px;border:1px solid var(--line);background:var(--card);font-size:13px;color:var(--ink-2)}
+.chip.on{background:var(--leaf);border-color:var(--leaf);color:#fff}
+.empty{padding:32px 16px;text-align:center;color:var(--ink-3);font-size:14px}
+.err{background:var(--red-l);color:var(--red);border-radius:12px;padding:12px 14px;font-size:13px;margin-bottom:10px}
+.btn-add{display:flex;align-items:center;justify-content:center;gap:6px;padding:0 14px;border-radius:12px;background:var(--leaf);color:#fff;font-weight:600;font-size:14px;white-space:nowrap}
 
-/* Filter chips */
-.chips{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
-.chip{font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;}
-.chip.active{background:var(--green-l);color:var(--green-t);border-color:#a8d5be;font-weight:500;}
+/* 統計 */
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpi{background:var(--card);border-radius:14px;padding:12px 14px}
+.kpi span{font-size:12px;color:var(--ink-2)}
+.kpi b{display:block;font-size:20px;margin-top:2px}
+.rank{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--paper-2)}
+.rank:last-child{border-bottom:0}
+.rank .n{width:20px;font-size:12px;color:var(--ink-3);text-align:right}
+.rank .nm{flex:1;min-width:0}
+.rank .nm div{font-size:14px;font-weight:500}
+.rank .nm small{font-size:11px;color:var(--ink-3)}
+.rank .track{height:5px;background:var(--paper-2);border-radius:3px;margin-top:4px;overflow:hidden}
+.rank .track i{display:block;height:100%;background:var(--leaf-m);border-radius:3px}
+.rank .v{text-align:right;font-size:14px;font-weight:600}
+.tbl-w{overflow-x:auto;background:var(--card);border-radius:14px}
+table{border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap}
+th,td{padding:9px 12px;text-align:right;border-bottom:1px solid var(--paper-2)}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:500;color:var(--ink-2);font-size:12px;background:var(--paper-2)}
 
-/* Record cards */
-.rec-card{background:var(--card);border-radius:var(--radius-lg);border:1px solid var(--border);padding:13px 14px;margin-bottom:8px;}
-.rec-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
-.rec-name{font-size:14px;font-weight:500;color:var(--text);}
-.rec-amount{font-size:15px;font-weight:600;color:var(--green);}
-.rec-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:4px;}
-.rec-detail{font-size:11px;color:var(--text2);}
-.rec-addr{font-size:11px;color:var(--text2);margin:3px 0;}
-.badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;}
-.b-done{background:var(--green-l);color:var(--green-t);}
-.b-pending{background:var(--amber-l);color:var(--amber);}
-.b-cancel{background:var(--red-l);color:var(--red);}
+/* 底部抽屜 */
+.sheet-bg{position:fixed;inset:0;z-index:50;background:rgba(30,26,18,.45);display:none;align-items:flex-end;justify-content:center}
+.sheet-bg.open{display:flex}
+.sheet{background:var(--paper);width:100%;max-width:520px;max-height:94vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:.4}}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}.icon-b.spin svg{animation:none}}
+.sheet-h{display:flex;align-items:center;padding:14px 16px 10px;gap:8px}
+.sheet-h h2{flex:1;font-size:17px}
+.sheet-h button{font-size:14px;color:var(--ink-2);padding:4px 8px}
+.sheet-b{overflow-y:auto;padding:4px 16px 16px;flex:1;-webkit-overflow-scrolling:touch}
+.sheet-f{padding:10px 16px calc(12px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--line)}
 
-/* Customer avatar */
-.cust-card{background:var(--card);border-radius:var(--radius-lg);border:1px solid var(--border);padding:13px 14px;margin-bottom:8px;}
-.cust-top{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
-.avatar{width:38px;height:38px;border-radius:50%;background:var(--green-l);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;color:var(--green-t);flex-shrink:0;}
-.cust-name{font-size:14px;font-weight:500;color:var(--text);}
-.cust-phone{font-size:12px;color:var(--text2);}
-.cust-note{font-size:11px;color:var(--text2);margin-top:2px;}
+.fld{margin-bottom:10px}
+.fld label{display:block;font-size:12px;color:var(--ink-2);margin-bottom:4px}
+.in{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card);font-size:16px;min-height:44px}
+.in:focus{outline:2px solid var(--leaf-m);outline-offset:0;border-color:var(--leaf)}
+.in[readonly]{background:var(--paper-2);color:var(--ink-2)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.seg{display:flex;background:var(--paper-2);border-radius:10px;padding:3px}
+.seg button{flex:1;padding:8px 0;border-radius:8px;font-size:14px;color:var(--ink-2)}
+.seg button.on{background:var(--card);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
 
-/* FAB */
-.fab-wrap{position:fixed;bottom:24px;right:calc(50% - 215px + 12px);z-index:40;}
-@media(max-width:430px){.fab-wrap{right:16px;}}
-.fab{width:50px;height:50px;border-radius:50%;background:var(--green);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(45,106,79,.4);}
-.fab svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
-/* Year selector */
-.year-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
-.year-tab{font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;font-weight:500;}
-.year-tab.active{background:var(--green);color:#fff;border-color:var(--green);}
-/* Customer order list */
-.cust-orders{margin-top:8px;border-top:1px solid var(--border);padding-top:8px;}
-.cust-order-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:0.5px solid var(--bg2);}
-.cust-order-row:last-child{border-bottom:none;}
-.cust-order-left{flex:1;}
-.cust-order-item{font-size:12px;color:var(--text);font-weight:500;}
-.cust-order-meta{font-size:10px;color:var(--text3);margin-top:1px;}
-.cust-order-right{text-align:right;flex-shrink:0;}
-.cust-order-amt{font-size:13px;font-weight:600;color:var(--green);}
-.cust-order-prod{font-size:10px;color:var(--text3);}
-.cust-expand{font-size:11px;color:var(--green);cursor:pointer;margin-top:6px;display:inline-block;}
-.collapsed .cust-order-row{display:none;}
-.collapsed .cust-order-row:nth-child(-n+3){display:flex;}
+.oline{background:var(--card);border-radius:14px;padding:12px;margin-bottom:10px;border:1px solid var(--line)}
+.oline-h{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.oline-h .no{font-size:12px;color:var(--ink-3);width:18px}
+.oline-h .in{flex:1}
+.bag-t{padding:0 10px;height:44px;border-radius:10px;border:1px solid var(--line);font-size:13px;color:var(--ink-3);white-space:nowrap}
+.bag-t.on{background:var(--leaf-l);border-color:var(--leaf-m);color:var(--leaf);font-weight:600}
+.oline .grid3 label{font-size:11px}
+.oline-f{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:13px;color:var(--ink-2)}
+.oline-f .sp{flex:1}
+.oline-f b{color:var(--ink)}
+.link{color:var(--leaf);font-size:13px;padding:4px 6px}
+.link.red{color:var(--red)}
+.detail{display:none;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+.detail.open{display:block}
+.add-line{width:100%;padding:12px;border:1.5px dashed var(--leaf-m);border-radius:14px;color:var(--leaf);font-weight:600;margin-bottom:14px}
+.box{background:var(--card);border-radius:14px;padding:12px;margin-bottom:12px}
+.box-t{font-size:13px;font-weight:600;margin-bottom:8px}
+.qrow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.qrow>span{width:48px;font-size:13px;color:var(--ink-2);flex-shrink:0}
+.qrow .in{width:84px;flex-shrink:0;text-align:right;padding:8px 10px;min-height:38px}
+.qrow .chips{margin:0;flex:1}
+.qrow .chip{padding:5px 11px}
+.sum{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.sum div{flex:1}
+.sum span{font-size:12px;color:var(--ink-2)}
+.sum b{display:block;font-size:20px}
+.sum b.pos{color:var(--leaf)} .sum b.neg{color:var(--red)}
+.btn{width:100%;padding:14px;border-radius:12px;background:var(--leaf);color:#fff;font-size:16px;font-weight:700}
+.btn:disabled{opacity:.55}
+.btn.gold{background:var(--gold)}
+.btn.ghost{background:var(--card);color:var(--leaf);border:1px solid var(--leaf-m);margin-top:8px}
+.btn.danger{background:var(--card);color:var(--red);border:1px solid #E3B6AF;margin-top:8px}
+.kv{display:flex;justify-content:space-between;padding:7px 0;font-size:14px;border-bottom:1px solid var(--paper-2)}
+.kv:last-child{border-bottom:0}
+.kv span{color:var(--ink-2)}
+.hint{font-size:12px;color:var(--ink-3);margin:-4px 0 10px;line-height:1.5}
 
-/* Modal */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;align-items:flex-end;justify-content:center;}
-.modal-bg.open{display:flex;}
-.modal{background:var(--card);border-radius:20px 20px 0 0;padding:20px 16px 36px;width:100%;max-width:430px;max-height:90vh;overflow-y:auto;}
-.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;}
-.modal-title{font-size:16px;font-weight:600;margin-bottom:14px;color:var(--text);}
-.form-group{margin-bottom:11px;}
-.form-label{font-size:12px;color:var(--text2);margin-bottom:4px;display:block;}
-.form-input{width:100%;padding:10px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg);font-size:14px;color:var(--text);outline:none;}
-.form-input:focus{border-color:var(--green);}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.btn-primary{width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:var(--radius);font-size:15px;font-weight:600;cursor:pointer;margin-top:8px;}
-.btn-primary:active{opacity:.85;}
-.btn-primary:disabled{background:var(--text3);cursor:not-allowed;}
-.btn-cancel{width:100%;padding:10px;background:transparent;color:var(--text2);border:none;font-size:13px;cursor:pointer;margin-top:4px;}
-.section-title{font-size:13px;font-weight:500;color:var(--text2);margin:4px 0 8px;}
-.empty{text-align:center;padding:32px 20px;color:var(--text3);font-size:13px;}
-.icon-btn{background:none;border:none;cursor:pointer;font-size:16px;padding:2px 4px;line-height:1;opacity:.7;}
-.icon-btn:hover{opacity:1;}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--green);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;}
-.toast.show{opacity:1;}
-/* 登入畫面 */
-.login-screen{position:fixed;inset:0;background:var(--green);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;padding:32px;}
-.login-logo{font-size:64px;margin-bottom:16px;}
-.login-title{font-size:24px;font-weight:700;color:#fff;margin-bottom:8px;letter-spacing:.5px;}
-.login-sub{font-size:14px;color:rgba(255,255,255,.7);margin-bottom:48px;}
-.login-card{background:#fff;border-radius:20px;padding:28px 24px;width:100%;max-width:320px;text-align:center;}
-.login-card-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;}
-.login-card-sub{font-size:12px;color:var(--text2);margin-bottom:20px;}
-.google-btn{width:100%;padding:12px;background:#fff;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-weight:500;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;}
-.google-btn:active{background:var(--bg2);}
-.login-loading{font-size:13px;color:var(--text2);margin-top:12px;display:none;}
+/* 登入 */
+.login{position:fixed;inset:0;z-index:100;background:var(--leaf-d);display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px;color:#fff}
+.login.open{display:flex}
+.login h1{font-size:26px;margin-bottom:4px}
+.login p{color:var(--leaf-m);font-size:13px;margin-bottom:26px}
+.login .in{max-width:300px;text-align:center;font-size:18px;letter-spacing:4px}
+.login .btn{max-width:300px;margin-top:10px;background:var(--gold)}
+.login .e{color:#F4B9B0;font-size:13px;margin-top:10px;min-height:20px;text-align:center}
+
+.toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:10px 18px;border-radius:24px;font-size:14px;opacity:0;pointer-events:none;transition:.2s;z-index:200;max-width:90%;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.loading{padding:40px;text-align:center;color:var(--ink-3)}
 </style>
 </head>
 <body>
-<!-- 密碼登入畫面 -->
-<div id="pwScreen" style="display:none;position:fixed;inset:0;background:var(--green);z-index:999;flex-direction:column;align-items:center;justify-content:center;padding:32px;">
-  <div style="font-size:56px;margin-bottom:12px;">🍃</div>
-  <div style="font-size:24px;font-weight:700;color:#fff;letter-spacing:1px;">崧發茶園</div>
-  <div style="font-size:13px;color:rgba(255,255,255,.7);margin-bottom:36px;">管理系統</div>
-  <div style="background:#fff;border-radius:18px;padding:26px 22px;width:100%;max-width:320px;">
-    <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;text-align:center;">請輸入管理密碼</div>
-    <input id="pwInput" type="password" placeholder="密碼" autocomplete="current-password"
-      style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--border);font-size:16px;outline:none;box-sizing:border-box;"
-      onkeydown="if(event.key==='Enter')doLogin()">
-    <div id="pwError" style="display:none;font-size:12px;color:var(--red);margin-top:8px;text-align:center;">密碼錯誤，請再試一次</div>
-    <button id="loginBtn" onclick="doLogin()"
-      style="width:100%;padding:13px;margin-top:14px;background:var(--green);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;">登入</button>
-  </div>
+
+<div class="login" id="login">
+  <h1>崧發茶園</h1>
+  <p>請輸入管理密碼</p>
+  <input class="in" id="pw" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+  <button class="btn" id="loginBtn" onclick="doLogin()">登入</button>
+  <div class="e" id="loginErr"></div>
 </div>
+
 <div class="app">
-  <div class="topbar">
-    <div class="topbar-row">
-      <div class="topbar-logo">
-        <span class="topbar-leaf">🍃</span>
-        <div>
-          <div class="topbar-name">崧發茶園</div>
-          <div class="topbar-sub">管理系統</div>
-        </div>
+  <header class="top">
+    <h1 id="pageTitle">總覽</h1>
+    <span class="sync" id="syncTxt"></span>
+    <button class="icon-b" id="syncBtn" onclick="refreshAll(true)" aria-label="同步">
+      <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+    </button>
+    <button class="icon-b" onclick="openSettings()" aria-label="設定">
+      <svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+    </button>
+  </header>
+
+  <main>
+    <section class="page on" id="p-dash"></section>
+    <section class="page" id="p-orders">
+      <div class="search">
+        <input id="oq" type="search" placeholder="搜尋客戶、品項、備註" oninput="renderOrders()">
+        <button class="btn-add" onclick="openOrderForm()">＋ 訂單</button>
       </div>
-      <div style="display:flex;gap:8px;">
-        <button class="sync-btn" onclick="syncAll()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-          同步
-        </button>
-        <button class="sync-btn" onclick="doLogout()" title="登出">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        </button>
+      <div class="chips" id="oFilter"></div>
+      <div id="oList"></div>
+    </section>
+    <section class="page" id="p-cust">
+      <div class="search">
+        <input id="cq" type="search" placeholder="搜尋姓名、電話" oninput="renderCustomers()">
+        <button class="btn-add" onclick="openCustomerForm()">＋ 客戶</button>
       </div>
-    </div>
-    <div class="tab-row">
-      <div class="tab active" onclick="switchTab('dashboard')">總覽</div>
-      <div class="tab" onclick="switchTab('orders')">訂單</div>
-      <div class="tab" onclick="switchTab('customers')">客戶</div>
-      <div class="tab" onclick="switchTab('stats')">統計</div>
-      <div class="tab" onclick="switchTab('annual')">年報</div>
-      <div class="tab" onclick="switchTab('items')">品項</div>
-      <div class="tab" onclick="switchTab('purchase')">茶乾</div>
-    </div>
-  </div>
-
-  <!-- 總覽 -->
-  <div class="content active" id="tab-dashboard">
-    <div id="dashboard-loading" class="loading"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>
-    <div id="dashboard-content" style="display:none">
-      <div class="stat-grid" id="statsGrid"></div>
-      <div class="chart-card"><div class="chart-title">近 6 個月營收（元）</div><div class="month-chart" id="monthChart"></div></div>
-      <div class="chart-card">
-        <div class="chart-title">訂單狀態分布</div>
-        <div class="donut-row">
-          <svg id="donutSvg" width="80" height="80" viewBox="0 0 80 80"></svg>
-          <div class="legend" id="donutLegend"></div>
-        </div>
+      <div class="chips" id="cSort"></div>
+      <div id="cList"></div>
+    </section>
+    <section class="page" id="p-stats"></section>
+    <section class="page" id="p-buy">
+      <div class="search">
+        <input id="bq" type="search" placeholder="搜尋供應商、品項" oninput="renderPurchases()">
+        <button class="btn-add" onclick="openPurchaseForm()">＋ 進貨</button>
       </div>
-    </div>
-  </div>
-
-  <!-- 訂單 -->
-  <div class="content" id="tab-orders">
-    <div class="search-wrap"><input type="text" id="orderSearch" placeholder="搜尋客戶、品項…" oninput="domSearch('orderList',this.value)"></div>
-    <div class="chips">
-      <div class="chip active" onclick="setOrderFilter('all',this)">全部</div>
-      <div class="chip" onclick="setOrderFilter('已出貨',this)">已出貨</div>
-      <div class="chip" onclick="setOrderFilter('未出貨',this)">未出貨</div>
-      <div class="chip" onclick="setOrderFilter('取消',this)">取消</div>
-    </div>
-    <div id="orderList" style="padding-bottom:72px;"></div>
-  </div>
-
-  <!-- 客戶 -->
-  <div class="content" id="tab-customers">
-    <div class="search-wrap"><input type="text" id="customerSearch" placeholder="搜尋姓名、電話、地址…" oninput="domSearch('customerList',this.value)"></div>
-    <div id="customerList" style="padding-bottom:72px;"></div>
-  </div>
-
-  <!-- 統計 -->
-  <div class="content" id="tab-stats">
-    <div id="stats-loading" class="loading"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>
-    <div id="stats-content" style="display:none;padding-bottom:72px;">
-      <div class="year-tabs" id="yearTabs"></div>
-      <div class="chart-card"><div class="chart-title">各月營收 vs 淨利</div><div id="yearMonthChart"></div></div>
-      <div class="chart-card"><div class="chart-title">品項銷售排行（總金額）</div><div id="productChart"></div></div>
-      <div class="chart-card"><div class="chart-title">客戶消費排行</div><div id="customerChart"></div></div>
-      <div class="chart-card"><div class="chart-title">年度總計</div><div id="yearSummary"></div></div>
-    </div>
-  </div>
-
-  <!-- 年度報表 -->
-  <div class="content" id="tab-annual">
-    <div id="annual-loading" class="loading"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>
-    <div id="annual-content" style="display:none;padding-bottom:20px;"></div>
-  </div>
-
-  <!-- 品項統計 -->
-  <div class="content" id="tab-items">
-    <div class="search-wrap"><input type="text" placeholder="搜尋品項名稱…" oninput="domSearch('items-content',this.value)"></div>
-    <div id="items-loading" class="loading"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>
-    <div id="items-content" style="display:none;padding-bottom:20px;"></div>
-  </div>
-
-  <!-- 茶乾購買 -->
-  <div class="content" id="tab-purchase">
-    <div class="search-wrap"><input type="text" placeholder="搜尋姓名、品項…" oninput="domSearch('purchase-content',this.value)"></div>
-    <div id="purchase-loading" class="loading"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div>
-    <div id="purchase-content" style="display:none;padding-bottom:72px;"></div>
-  </div>
+      <div id="bList"></div>
+    </section>
+  </main>
 </div>
 
-<!-- 全域 FAB，依目前分頁動作 -->
-<div class="fab-wrap" id="globalFab" style="display:none;">
-  <button class="fab" id="fabBtn" onclick="fabAction()" aria-label="新增">
-    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-  </button>
-</div>
+<nav class="nav"><div class="nav-in">
+  <button class="on" data-p="dash" onclick="go('dash')"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>總覽</button>
+  <button data-p="orders" onclick="go('orders')"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>訂單</button>
+  <button data-p="cust" onclick="go('cust')"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg>客戶</button>
+  <button data-p="stats" onclick="go('stats')"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>統計</button>
+  <button data-p="buy" onclick="go('buy')"><svg viewBox="0 0 24 24"><path d="M12 3c4 3 6 6 6 10a6 6 0 0 1-12 0c0-4 2-7 6-10z"/><path d="M12 9v12"/></svg>茶乾</button>
+</div></nav>
 
-<!-- Modal -->
-<div class="modal-bg" id="modalBg">
-  <div class="modal" id="modalBox"></div>
+<div class="sheet-bg" id="sheetBg" onclick="if(event.target===this)closeSheet()">
+  <div class="sheet" id="sheet"></div>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
+/* ================= 基本設定 ================= */
 const API = 'https://script.google.com/macros/s/AKfycbxBgLNLVEuEYkKBwRIT3Ru29kuyYFIhIahm62BtnzLPCD211iAKevTmwqKQHMYuubDHsw/exec';
+const SH = { orders:'訂單紀錄', cust:'客戶資料', buy:'茶乾購買', annual:'年度報表' };
+const STATUSES = ['已出貨','未出貨','取消'];
+const CACHE_KEY = 'songfa_v2_cache';
+const SET_KEY = 'songfa_v2_settings';
+const DEFAULT_SET = { leaf:50, roast:50, deox:16, boxChips:'0,30', shipChips:'0,110,150,210', feeChips:'0,60,90,120' };
 
-// ── DOM 直接搜尋（最可靠方式）──
-function domSearch(containerId, q) {
-  const sq = (q || '').trim().toLowerCase();
-  const container = document.getElementById(containerId);
-  if (!container) return;
-  const cards = container.querySelectorAll('[data-search]');
-  if (cards.length === 0) {
-    // 沒有 data-search，用 innerText 代替
-    const allCards = container.querySelectorAll('.rec-card');
-    allCards.forEach(card => {
-      card.style.display = (!sq || card.innerText.toLowerCase().includes(sq)) ? '' : 'none';
-    });
-    return;
+let PW = null;
+let DB = { orders:[], customers:[], purchases:[], annual:[] };
+let SET = loadSettings();
+let curPage = 'dash';
+let oFilter = 'all';
+let cSort = 'recent';
+let statYear = null;
+
+/* ================= 小工具 ================= */
+const $ = id => document.getElementById(id);
+const num = v => { const n = parseFloat(String(v ?? '').replace(/,/g,'')); return isNaN(n) ? 0 : n; };
+const money = v => '$' + Math.round(num(v)).toLocaleString();
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const today = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
+// 品項合併：不分大小寫、忽略空白、不管字的順序（金萱輕焙＝輕焙金萱）
+const itemKey = s => [...String(s || '').toLowerCase().replace(/\s+/g,'')].sort().join('');
+const isBagName = s => String(s || '').includes('茶包');
+const rid = () => Math.random().toString(36).slice(2,10).toUpperCase();
+const chipList = s => String(s || '').split(/[,，\s]+/).filter(x => x !== '').map(Number).filter(n => !isNaN(n));
+
+// 各種日期格式 → YYYY-MM-DD（Excel 序號、ISO、2026.1.20、2026/1/20）
+function normDate(v) {
+  if (v === null || v === undefined || v === '') return '';
+  if (typeof v === 'number' || /^\d{5}(\.\d+)?$/.test(String(v))) {
+    const d = new Date(Math.round((num(v) - 25569) * 86400000));
+    return `${d.getUTCFullYear()}-${pad(d.getUTCMonth()+1)}-${pad(d.getUTCDate())}`;
   }
-  cards.forEach(card => {
-    const text = card.dataset.search.toLowerCase();
-    card.style.display = (!sq || text.includes(sq)) ? '' : 'none';
-  });
+  const s = String(v).trim();
+  if (/T\d{2}:/.test(s)) { const d = new Date(s); if (!isNaN(d)) return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+  const m = s.match(/^(\d{4})[.\/\-](\d{1,2})[.\/\-](\d{1,2})/);
+  if (m) return `${m[1]}-${pad(m[2])}-${pad(m[3])}`;
+  return s;
 }
 
-let orders = [];
-let customers = [];
-let annualData = [];
-let itemsData = [];
-let purchaseData = [];
-let orderFilter = 'all';
-let itemsLoaded = false;
-let annualLoaded = false;
-let purchaseLoaded = false;
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+function toast(msg) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2600);
 }
 
-// ── API 核心（密碼不存在程式碼中，由使用者輸入後計算 hash）──
-let PW_HASH = null; // 登入後才有值
-
-async function sha256(text) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+function loadSettings() {
+  try { return { ...DEFAULT_SET, ...JSON.parse(localStorage.getItem(SET_KEY) || '{}') }; }
+  catch(e) { return { ...DEFAULT_SET }; }
 }
 
+/* ================= API ================= */
+async function sha256(t) {
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(t));
+  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2,'0')).join('');
+}
+async function api(params, hash) {
+  const p = { ...params, pwHash: hash || PW };
+  const qs = Object.entries(p).map(([k,v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&');
+  let text;
+  try { text = await (await fetch(API + '?' + qs, { redirect:'follow' })).text(); }
+  catch(e) { throw new Error('連不上 Google（' + e.message + '）'); }
+  let d;
+  try { d = JSON.parse(text); }
+  catch(e) { throw new Error('Google 回應異常，多半是 Apps Script 部署權限跑掉了'); }
+  if (d && d.error) {
+    if (d.code === 401 && !hash) { requireLogin(); }
+    throw new Error(d.code === 401 ? '密碼錯誤或已失效' : d.error);
+  }
+  return d;
+}
+const getAll = (sheet, hash) => api({ action:'getAll', sheet }, hash).then(d => d.rows || []);
+const addRow = (sheet, fields) => api({ action:'addRow', sheet, fields: JSON.stringify(fields) });
+const updRow = (sheet, rowIndex, fields) => api({ action:'updateRow', sheet, rowIndex, fields: JSON.stringify(fields) });
+const delRow = (sheet, rowIndex) => api({ action:'deleteRow', sheet, rowIndex });
+const clean = r => { const o = { ...r }; Object.keys(o).forEach(k => { if (k.startsWith('_')) delete o[k]; }); return o; };
+
+/* ================= 登入與載入 ================= */
+function requireLogin() {
+  PW = null;
+  try { localStorage.removeItem('songfa_pwhash'); } catch(e) {}
+  $('login').classList.add('open');
+}
 async function doLogin() {
-  const pw = document.getElementById('pwInput').value.trim();
-  if (!pw) return;
-  const btn = document.getElementById('loginBtn');
-  const errEl = document.getElementById('pwError');
-  btn.disabled = true;
-  btn.textContent = '驗證中…';
-  errEl.style.display = 'none';
+  const pw = $('pw').value.trim(); if (!pw) return;
+  const b = $('loginBtn'); b.disabled = true; b.textContent = '驗證中…'; $('loginErr').textContent = '';
   try {
     const hash = await sha256(pw);
-    const url = API + '?action=getAll&sheet=' + encodeURIComponent('客戶資料') + '&pwHash=' + hash;
-    let res, text, data;
-    try {
-      res = await fetch(url, { redirect: 'follow' });
-      text = await res.text();
-    } catch(fetchErr) {
-      throw new Error('fetch 失敗：' + fetchErr.message);
-    }
-    try {
-      data = JSON.parse(text);
-    } catch(e) {
-      throw new Error('回應非 JSON：' + text.slice(0, 120));
-    }
-    if (data.error && data.code === 401) {
-      errEl.textContent = '密碼錯誤（hash=' + hash.slice(0,8) + '…）';
-      errEl.style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = '登入';
-      return;
-    }
-    if (data.error) {
-      throw new Error('API 錯誤：' + data.error);
-    }
-    PW_HASH = hash;
+    const rows = await getAll(SH.cust, hash);   // 驗證順便拿客戶資料
+    PW = hash;
     try { localStorage.setItem('songfa_pwhash', hash); } catch(e) {}
-    document.getElementById('pwScreen').style.display = 'none';
-    loadDashboard();
+    $('login').classList.remove('open');
+    setCustomers(rows);
+    refreshAll(false, { skipCust:true });
   } catch(e) {
-    errEl.textContent = e.message;
-    errEl.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = '登入';
+    $('loginErr').textContent = e.message;
   }
+  b.disabled = false; b.textContent = '登入';
 }
 
-function doLogout() {
-  PW_HASH = null;
-  try { localStorage.removeItem('songfa_pwhash'); } catch(e) {}
-  location.reload();
+function setOrders(rows) {
+  DB.orders = rows.filter(r => r['客戶資料'] || r['品項']).map(r => ({ ...r, 日期: normDate(r['日期']) }));
 }
+function setCustomers(rows) { DB.customers = rows.filter(r => String(r['客戶姓名'] || '').trim()); }
+function setPurchases(rows) { DB.purchases = rows.filter(r => r['姓名'] || r['品項']); }
 
-async function checkSavedLogin() {
-  let saved = null;
-  try { saved = localStorage.getItem('songfa_pwhash'); } catch(e) {}
-  if (saved) {
-    try {
-      const url = API + '?action=getAll&sheet=' + encodeURIComponent('客戶資料') + '&pwHash=' + saved;
-      const res = await fetch(url, { redirect: 'follow' });
-      const text = await res.text();
-      const data = JSON.parse(text);
-      if (!data.error || data.code !== 401) {
-        PW_HASH = saved;
-        document.getElementById('pwScreen').style.display = 'none';
-        loadDashboard();
-        return;
-      }
-    } catch(e) {
-      try { localStorage.removeItem('songfa_pwhash'); } catch(e2) {}
-    }
-  }
-  document.getElementById('pwScreen').style.display = 'flex';
+function saveCache() {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ t: Date.now(), orders: DB.orders, customers: DB.customers, purchases: DB.purchases })); } catch(e) {}
 }
-
-async function apiGet(params) {
-  if (!PW_HASH) return { error: '尚未登入' };
-  const p = { ...params, pwHash: PW_HASH };
-  const qs = Object.entries(p).map(([k, v]) => encodeURIComponent(k) + '=' + encodeURIComponent(v)).join('&');
-  const url = API + '?' + qs;
-  const res = await fetch(url, { redirect: 'follow' });
-  const text = await res.text();
-  try { return JSON.parse(text); }
-  catch(e) { return { error: '回應異常：' + text.slice(0, 100) }; }
-}
-
-async function apiFetch(params) {
-  return apiGet(params);
-}
-
-async function apiAddRow(sheet, fields) {
-  return apiGet({ action: 'addRow', sheet, fields: JSON.stringify(fields) });
-}
-
-async function apiUpdateRow(sheet, rowIndex, fields) {
-  return apiGet({ action: 'updateRow', sheet, rowIndex, fields: JSON.stringify(fields) });
-}
-
-async function apiDeleteRow(sheet, rowIndex) {
-  return apiGet({ action: 'deleteRow', sheet, rowIndex });
-}
-
-// 確認刪除 dialog
-function confirmDelete(msg, onConfirm) {
-  const d = document.createElement('div');
-  d.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;';
-  d.innerHTML = `<div style="background:var(--card);border-radius:16px;padding:24px 20px;max-width:320px;width:100%;text-align:center;">
-    <div style="font-size:32px;margin-bottom:12px;">🗑️</div>
-    <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:8px;">確認刪除</div>
-    <div style="font-size:13px;color:var(--text2);margin-bottom:20px;">${msg}</div>
-    <div style="display:flex;gap:10px;">
-      <button onclick="this.closest('div[style]').remove()" style="flex:1;padding:11px;border-radius:8px;border:1px solid var(--border);background:var(--card);font-size:14px;cursor:pointer;color:var(--text2);">取消</button>
-      <button id="confirmDelBtn" style="flex:1;padding:11px;border-radius:8px;border:none;background:var(--red);color:#fff;font-size:14px;font-weight:600;cursor:pointer;">刪除</button>
-    </div>
-  </div>`;
-  document.body.appendChild(d);
-  d.querySelector('#confirmDelBtn').onclick = () => { d.remove(); onConfirm(); };
-  d.onclick = e => { if (e.target === d) d.remove(); };
-}
-
-function excelDateToStr(serial) {
-  if (!serial || isNaN(serial)) return String(serial || '');
-  const d = new Date(Math.round((serial - 25569) * 86400 * 1000));
-  return d.toISOString().slice(0, 10);
-}
-
-// ── 載入資料 ──
-async function loadOrders() {
+function loadCache() {
   try {
-    const data = await apiFetch({ action: 'getAll', sheet: '訂單紀錄' });
-    if (data.error) throw new Error(data.error);
-    orders = (data.rows || []).map(r => ({
-      ...r,
-      日期: excelDateToStr(r['日期']),
-      _rowIndex: r._rowIndex
-    }));
-    const q = document.getElementById('orderSearch')?.value || '';
-    filterOrders(q);
-  } catch (e) {
-    document.getElementById('orderList').innerHTML = `<div class="error-box">載入失敗：${e.message}</div>`;
-  }
+    const c = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+    if (!c) return null;
+    DB.orders = c.orders || []; DB.customers = c.customers || []; DB.purchases = c.purchases || [];
+    return c.t;
+  } catch(e) { return null; }
+}
+function setSync(state, t) {
+  const b = $('syncBtn');
+  b.classList.toggle('spin', state === 'busy');
+  if (state === 'busy') $('syncTxt').textContent = '更新中';
+  else if (state === 'err') $('syncTxt').textContent = '更新失敗';
+  else if (t) { const d = new Date(t); $('syncTxt').textContent = pad(d.getHours()) + ':' + pad(d.getMinutes()); }
 }
 
-async function loadCustomers() {
+let refreshing = false;
+async function refreshAll(manual, opt = {}) {
+  if (!PW || refreshing) return;
+  refreshing = true; setSync('busy');
   try {
-    const data = await apiFetch({ action: 'getAll', sheet: '客戶資料' });
-    if (data.error) throw new Error(data.error);
-    customers = data.rows || [];
-    const q = document.querySelector('#tab-customers input')?.value || '';
-    filterCustomers(q);
-  } catch (e) {
-    document.getElementById('customerList').innerHTML = `<div class="error-box">載入失敗：${e.message}</div>`;
-  }
-}
-
-async function loadDashboard() {
-  document.getElementById('dashboard-loading').style.display = 'block';
-  document.getElementById('dashboard-content').style.display = 'none';
-  await Promise.all([loadOrders(), loadCustomers()]);
-  buildDashboard();
-  document.getElementById('dashboard-loading').style.display = 'none';
-  document.getElementById('dashboard-content').style.display = 'block';
-}
-
-async function loadStats() {
-  document.getElementById('stats-loading').style.display = 'block';
-  document.getElementById('stats-content').style.display = 'none';
-  if (orders.length === 0) await loadOrders();
-  buildStats();
-  document.getElementById('stats-loading').style.display = 'none';
-  document.getElementById('stats-content').style.display = 'block';
-}
-
-async function loadAnnual() {
-  if (annualLoaded) return;
-  document.getElementById('annual-loading').style.display = 'block';
-  document.getElementById('annual-content').style.display = 'none';
-  try {
-    const data = await apiFetch({ action: 'getAll', sheet: '年度報表' });
-    annualData = (data.rows || []).filter(r => r['年度'] && String(r['年度']).match(/^\d{4}/));
-    renderAnnual(annualData);
-    annualLoaded = true;
+    const jobs = [getAll(SH.orders), getAll(SH.buy)];
+    if (!opt.skipCust) jobs.push(getAll(SH.cust));
+    const [o, b, c] = await Promise.all(jobs);
+    setOrders(o); setPurchases(b); if (c) setCustomers(c);
+    DB.annual = []; // 年度報表下次打開統計頁時重抓
+    saveCache(); setSync('ok', Date.now());
+    renderAll();
+    if (manual) toast('已同步最新資料');
   } catch(e) {
-    document.getElementById('annual-content').innerHTML = `<div class="error-box">載入失敗：${e.message}</div>`;
+    setSync('err');
+    if (PW) toast('更新失敗：' + e.message);
   }
-  document.getElementById('annual-loading').style.display = 'none';
-  document.getElementById('annual-content').style.display = 'block';
+  refreshing = false;
 }
 
-async function loadItems() {
-  if (itemsLoaded) return;
-  document.getElementById('items-loading').style.display = 'block';
-  document.getElementById('items-content').style.display = 'none';
-  try {
-    const data = await apiFetch({ action: 'getAll', sheet: '品項統計' });
-    itemsData = (data.rows || []).filter(r => r['品項名稱']);
-    renderItems(itemsData);
-    itemsLoaded = true;
-  } catch(e) {
-    document.getElementById('items-content').innerHTML = `<div class="error-box">載入失敗：${e.message}</div>`;
-  }
-  document.getElementById('items-loading').style.display = 'none';
-  document.getElementById('items-content').style.display = 'block';
+function renderAll() {
+  renderDash(); renderOrders(); renderCustomers(); renderPurchases();
+  if (curPage === 'stats') renderStats();
 }
 
-async function loadPurchase() {
-  if (purchaseLoaded) return;
-  document.getElementById('purchase-loading').style.display = 'block';
-  document.getElementById('purchase-content').style.display = 'none';
-  try {
-    const data = await apiFetch({ action: 'getAll', sheet: '茶乾購買' });
-    purchaseData = (data.rows || []).filter(r => r['姓名'] || r['品項']);
-    renderPurchase(purchaseData);
-    purchaseLoaded = true;
-  } catch(e) {
-    document.getElementById('purchase-content').innerHTML = `<div class="error-box">載入失敗：${e.message}</div>`;
-  }
-  document.getElementById('purchase-loading').style.display = 'none';
-  document.getElementById('purchase-content').style.display = 'block';
+/* ================= 訂單彙整 ================= */
+// 單列淨利（依照 Excel 的算法：茶包不扣茶葉消耗/烘焙/脫氧）
+function lineProfit(r) {
+  const bag = isBagName(r['品項']);
+  const extra = bag ? 0 : num(r['茶葉消耗']) + num(r['烘焙']) + num(r['脫氧+鋁袋']);
+  return num(r['總金額']) - num(r['茶葉*斤數成本']) - extra - num(r['箱子']) - num(r['運費']) - num(r['手續費']);
 }
-
-async function syncAll() {
-  showToast('同步中…');
-  await loadDashboard();
-  showToast('✓ 資料已更新');
-}
-
-// ── 渲染 ──
-function statusBadge(s) {
-  const m = { '已出貨': 'b-done', '未出貨': 'b-pending', '取消': 'b-cancel' };
-  return `<span class="badge ${m[s] || 'b-pending'}">${s || '未設定'}</span>`;
-}
-
-function filterOrders(q) {
-  const filtered = orderFilter === 'all' ? orders : orders.filter(r => (r['訂單狀態'] || '') === orderFilter);
-  document.getElementById('orderList').innerHTML = filtered.length ? filtered.map(r => {
-    const idx = r._rowIndex;
-    const searchText = [r['客戶資料'],r['品項'],r['產品編號'],r['備註'],r['日期'],r['訂單狀態']].filter(Boolean).join(' ');
-    return `<div class="rec-card" data-search="${searchText.replace(/"/g,'')}">
-      <div class="rec-top">
-        <div class="rec-name">${r['客戶資料'] || '（無客戶）'}</div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div class="rec-amount">$${Number(r['總金額'] || 0).toLocaleString()}</div>
-          <button onclick="editOrder(${idx})" class="icon-btn" title="編輯">✏️</button>
-          <button onclick="deleteOrder(${idx},'${(r['客戶資料']||'').replace(/'/g,'')}','${(r['品項']||'').replace(/'/g,'')}')" class="icon-btn" title="刪除">🗑️</button>
-        </div>
-      </div>
-      <div class="rec-meta">
-        <span class="rec-detail">${r['日期'] || ''}</span>
-        <span class="rec-detail"><b>${r['品項'] || ''}</b></span>
-        ${r['產品編號'] ? `<span class="rec-detail" style="color:var(--amber);">📦 ${r['產品編號']}</span>` : ''}
-        <span class="rec-detail">${r['斤數'] ? r['斤數'] + '斤' : ''}</span>
-        ${statusBadge(r['訂單狀態'])}
-      </div>
-      ${r['淨利'] !== undefined && r['淨利'] !== '' ? `<div style="font-size:11px;color:${Number(r['淨利'])>=0?'var(--green)':'var(--red)'};margin-top:4px;">淨利 $${Number(r['淨利']).toLocaleString()}</div>` : ''}
-      ${r['備註'] ? `<div class="rec-addr" style="margin-top:4px;">備註：${r['備註']}</div>` : ''}
-    </div>`;
-  }).join('') : '<div class="empty">沒有符合的訂單</div>';
-  // 套用現有搜尋詞
-  const sq = (q || document.getElementById('orderSearch')?.value || '').trim();
-  if (sq) domSearch('orderList', sq);
-}
-
-function renderOrders(list) { filterOrders(document.getElementById('orderSearch')?.value || ''); }
-
-function setOrderFilter(f, el) {
-  orderFilter = f;
-  document.querySelectorAll('#tab-orders .chip').forEach(c => c.classList.remove('active'));
-  el.classList.add('active');
-  filterOrders(document.getElementById('orderSearch')?.value || '');
-}
-
-function renderCustomers(list) {
-  document.getElementById('customerList').innerHTML = list.length ? list.map(c => {
-    const name = c['客戶姓名'] || '';
-    const idx  = c._rowIndex;
-    const custOrders = orders.filter(o => (o['客戶資料'] || '') === name);
-    const total = custOrders.reduce((s, o) => s + Number(o['總金額'] || 0), 0);
-    const safeName = name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
-    const searchText = [name, c['電話'], c['地址'], c['Line名稱'], c['口味偏好/備註']].filter(Boolean).join(' ');
-    return `<div class="rec-card" style="cursor:default;" data-search="${searchText.replace(/"/g,'')}">
-      <div class="rec-top">
-        <div style="display:flex;align-items:center;gap:10px;flex:1;">
-          <div class="avatar" style="cursor:pointer;" onclick="openCustomerDetail('${safeName}')" title="查看購買紀錄">${name.slice(0,1)||'？'}</div>
-          <div style="flex:1;">
-            <div class="cust-name">${name||'（未命名）'}</div>
-            <div class="cust-phone">${c['電話']||'無電話'}</div>
-            ${c['地址'] ? `<div style="font-size:11px;color:var(--text2);margin-top:2px;">📍 ${c['地址']}</div>` : ''}
-          </div>
-          <div style="text-align:right;flex-shrink:0;">
-            <div style="font-size:12px;font-weight:600;color:var(--green);">$${total.toLocaleString()}</div>
-            <div style="font-size:10px;color:var(--text3);">${custOrders.length} 筆</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:4px;margin-left:8px;flex-shrink:0;">
-          <button onclick="editCustomer(${idx})" class="icon-btn" title="編輯">✏️</button>
-          <button onclick="deleteCustomer(${idx},'${safeName}')" class="icon-btn" title="刪除">🗑️</button>
-        </div>
-      </div>
-    </div>`;
-  }).join('') : '<div class="empty">沒有客戶資料</div>';
-}
-
-function openCustomerDetail(name) {
-  const c = customers.find(c => c['客戶姓名'] === name);
-  if (!c) return;
-  const custOrders = orders.filter(o => (o['客戶資料'] || '') === name)
-    .sort((a, b) => new Date(b['日期']) - new Date(a['日期']));
-  const total = custOrders.reduce((s, o) => s + Number(o['總金額'] || 0), 0);
-  const profit = custOrders.reduce((s, o) => s + Number(o['淨利'] || 0), 0);
-
-  const orderRows = custOrders.length ? custOrders.map(o => `
-    <div style="border-bottom:0.5px solid var(--bg2);padding:10px 0;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
-        <div style="flex:1;">
-          <div style="font-size:13px;font-weight:500;color:var(--text);">${o['品項']||''}</div>
-          <div style="font-size:11px;color:var(--text2);margin-top:2px;">${o['日期']||''} · ${o['斤數']?o['斤數']+'斤':''}</div>
-          ${o['產品編號']?`<div style="font-size:10px;color:var(--amber);margin-top:1px;">📦 ${o['產品編號']}</div>`:''}
-        </div>
-        <div style="text-align:right;flex-shrink:0;">
-          <div style="font-size:13px;font-weight:600;color:var(--green);">$${Number(o['總金額']||0).toLocaleString()}</div>
-          ${o['淨利']!==undefined&&o['淨利']!==''?`<div style="font-size:10px;color:${Number(o['淨利'])>=0?'var(--green)':'var(--red)'};">淨利 $${Number(o['淨利']).toLocaleString()}</div>`:''}
-          ${statusBadge(o['訂單狀態'])}
-        </div>
-      </div>
-    </div>`).join('') : '<div class="empty" style="padding:16px 0;">尚無購買紀錄</div>';
-
-  const html = `
-    <div class="modal-handle"></div>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
-      <div class="avatar" style="width:48px;height:48px;font-size:18px;">${name.slice(0,1)||'？'}</div>
-      <div>
-        <div style="font-size:17px;font-weight:600;color:var(--text);">${name}</div>
-        <div style="font-size:12px;color:var(--text2);">${c['電話']||'無電話'}</div>
-        ${c['地址']?`<div style="font-size:12px;color:var(--text2);">📍 ${c['地址']}</div>`:''}
-        ${c['Line名稱']?`<div style="font-size:12px;color:var(--text2);">Line：${c['Line名稱']}</div>`:''}
-        ${c['口味偏好/備註']?`<div style="font-size:12px;color:var(--text2);">偏好：${c['口味偏好/備註']}</div>`:''}
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;">
-      <div style="background:var(--green-l);border-radius:8px;padding:10px;">
-        <div style="font-size:11px;color:var(--text2);">累計消費</div>
-        <div style="font-size:16px;font-weight:600;color:var(--green);">$${total.toLocaleString()}</div>
-      </div>
-      <div style="background:var(--bg2);border-radius:8px;padding:10px;">
-        <div style="font-size:11px;color:var(--text2);">累計淨利</div>
-        <div style="font-size:16px;font-weight:600;color:${profit>=0?'var(--green)':'var(--red)'};">$${Math.round(profit).toLocaleString()}</div>
-      </div>
-    </div>
-    <div style="font-size:13px;font-weight:500;color:var(--text2);margin-bottom:4px;">購買紀錄（${custOrders.length} 筆）</div>
-    ${orderRows}
-    <button class="btn-cancel" onclick="closeModal()" style="margin-top:12px;">關閉</button>`;
-
-  document.getElementById('modalBox').innerHTML = html;
-  document.getElementById('modalBg').classList.add('open');
-}
-
-function toggleOrders(id, el) {
-  const el2 = document.getElementById(id);
-  const isCollapsed = el2.classList.contains('collapsed');
-  el2.classList.toggle('collapsed', !isCollapsed);
-  el.textContent = isCollapsed ? '▲ 收起' : '▼ 顯示全部';
-}
-
-function filterCustomers(q) {
-  const sq = (q || '').trim();
-  const list = sq ? customers.filter(c =>
-    (c['客戶姓名'] || '').includes(sq) ||
-    (c['電話'] || '').includes(sq) ||
-    (c['地址'] || '').includes(sq) ||
-    (c['Line名稱'] || '').includes(sq) ||
-    (c['口味偏好/備註'] || '').includes(sq)
-  ) : customers;
-  renderCustomers(list);
-}
-
-// ── 總覽 Dashboard ──
-function buildDashboard() {
-  const now = new Date();
-  const thisMonth = now.getMonth();
-  const thisYear = now.getFullYear();
-
-  const monthOrders = orders.filter(o => {
-    const d = new Date(o['日期']);
-    return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
+// 同一天同一位客戶 = 一張出貨單
+function shipments(rows) {
+  const map = new Map();
+  rows.forEach(r => {
+    const k = r['日期'] + '|' + (r['客戶資料'] || '');
+    if (!map.has(k)) map.set(k, { key:k, date:r['日期'], cust:r['客戶資料'] || '', rows:[] });
+    map.get(k).rows.push(r);
   });
+  const list = [...map.values()];
+  list.forEach(s => {
+    s.rows.sort((a,b) => a._rowIndex - b._rowIndex);
+    s.total = s.rows.reduce((a,r) => a + num(r['總金額']), 0);
+    s.profit = s.rows.reduce((a,r) => a + num(r['淨利']), 0);
+    s.jin = s.rows.reduce((a,r) => a + (isBagName(r['品項']) ? 0 : num(r['斤數'])), 0);
+    const st = s.rows.map(r => r['訂單狀態'] || '已出貨');
+    s.status = st.includes('未出貨') ? '未出貨' : st.every(x => x === '取消') ? '取消' : '已出貨';
+    s.maxRow = Math.max(...s.rows.map(r => r._rowIndex || 0));
+  });
+  return list.sort((a,b) => b.date.localeCompare(a.date) || b.maxRow - a.maxRow);
+}
+const activeRows = () => DB.orders.filter(r => r['訂單狀態'] !== '取消');
+let SHIPS = [];
+let CUR_SHIP = null;
 
-  const totalRevenue = monthOrders.reduce((s, o) => s + Number(o['總金額'] || 0), 0);
-  const totalProfit = monthOrders.reduce((s, o) => s + Number(o['淨利'] || 0), 0);
-  const pending = orders.filter(o => (o['訂單狀態'] || '') === '未出貨').length;
+/* ================= 頁面切換 ================= */
+const TITLES = { dash:'總覽', orders:'訂單', cust:'客戶', stats:'統計', buy:'茶乾進貨' };
+function go(p) {
+  curPage = p;
+  document.querySelectorAll('.page').forEach(el => el.classList.toggle('on', el.id === 'p-' + p));
+  document.querySelectorAll('.nav button').forEach(el => el.classList.toggle('on', el.dataset.p === p));
+  $('pageTitle').textContent = TITLES[p];
+  if (p === 'stats') renderStats();
+  window.scrollTo(0,0);
+}
 
-  document.getElementById('statsGrid').innerHTML = `
-    <div class="stat-card"><div class="stat-label">本月營收</div><div class="stat-value green">$${totalRevenue.toLocaleString()}</div><div class="stat-sub">${monthOrders.length} 筆訂單</div></div>
-    <div class="stat-card"><div class="stat-label">本月淨利</div><div class="stat-value green">$${Math.round(totalProfit).toLocaleString()}</div><div class="stat-sub">毛利率 ${totalRevenue ? Math.round(totalProfit / totalRevenue * 100) : 0}%</div></div>
-    <div class="stat-card"><div class="stat-label">待出貨</div><div class="stat-value amber">${pending}</div><div class="stat-sub">筆訂單</div></div>
-    <div class="stat-card"><div class="stat-label">客戶總數</div><div class="stat-value">${customers.length}</div><div class="stat-sub">已建檔</div></div>`;
-
-  // 近6個月圖
+/* ================= 總覽 ================= */
+function renderDash() {
+  const now = new Date(), ym = `${now.getFullYear()}-${pad(now.getMonth()+1)}`, y = String(now.getFullYear());
+  const act = activeRows();
+  const sumBy = pre => act.filter(r => r['日期'].startsWith(pre)).reduce((a,r) => { a.t += num(r['總金額']); a.p += num(r['淨利']); return a; }, { t:0, p:0 });
+  const m = sumBy(ym), yr = sumBy(y);
   const months = [];
   for (let i = 5; i >= 0; i--) {
-    const d = new Date(thisYear, thisMonth - i, 1);
-    months.push({ year: d.getFullYear(), month: d.getMonth(), label: (d.getMonth() + 1) + '月' });
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const k = `${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+    months.push({ k, lbl: (d.getMonth()+1) + '月', ...sumBy(k) });
   }
-  const monthData = months.map(m => ({
-    label: m.label,
-    val: orders.filter(o => {
-      const d = new Date(o['日期']);
-      return d.getFullYear() === m.year && d.getMonth() === m.month;
-    }).reduce((s, o) => s + Number(o['總金額'] || 0), 0)
-  }));
-  const maxVal = Math.max(...monthData.map(m => m.val), 1);
-  document.getElementById('monthChart').innerHTML = monthData.map((m, i) => `
-    <div class="month-col">
-      <div class="month-bar" style="height:${Math.round(m.val / maxVal * 68)}px;background:${i === 5 ? 'var(--green)' : '#9FD1B6'};"></div>
-      <div class="month-lbl">${m.label}</div>
+  const mx = Math.max(1, ...months.map(x => x.t));
+  const ships = shipments(DB.orders);
+  const pending = ships.filter(s => s.status === '未出貨');
+  const recent = ships.slice(0, 5);
+  SHIPS = ships;
+  $('p-dash').innerHTML = `
+    <div class="hero">
+      <div class="lbl">${now.getMonth()+1} 月營業額</div>
+      <div class="big num">${money(m.t)}</div>
+      <div class="hero-row">
+        <div><span class="lbl">本月淨利</span><b class="num">${money(m.p)}</b></div>
+        <div><span class="lbl">${y} 年營業額</span><b class="num">${money(yr.t)}</b></div>
+      </div>
+    </div>
+    <button class="cta" onclick="openOrderForm()"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>新增訂單</button>
+    ${pending.length ? `<div class="sec-t">未出貨 ${pending.length} 筆</div>
+      <div class="list">${pending.map(s => shipRow(s)).join('')}</div>` : ''}
+    <div class="sec-t">近六個月</div>
+    <div class="bars">${months.map(x => `
+      <div class="bar"><em class="num">${x.t >= 10000 ? (x.t/10000).toFixed(1) + '萬' : Math.round(x.t)}</em>
+        <div class="stack"><div class="rv" style="height:${Math.max(0,(x.t - Math.max(0,x.p)))/mx*100}%"></div><div class="pf" style="height:${Math.max(0,x.p)/mx*100}%"></div></div>
+        <span>${x.lbl}</span></div>`).join('')}</div>
+    <div class="legend"><span><i style="background:var(--leaf)"></i>淨利</span><span><i style="background:var(--leaf-l)"></i>營業額</span></div>
+    <div class="sec-t">最近訂單 <a onclick="go('orders')">全部</a></div>
+    <div class="list">${recent.length ? recent.map(s => shipRow(s)).join('') : '<div class="empty">還沒有訂單</div>'}</div>`;
+}
+
+function shipRow(s) {
+  const items = s.rows.map(r => r['品項']).filter(Boolean);
+  const tag = s.status === '未出貨' ? '<span class="tag w">未出貨</span>' : s.status === '取消' ? '<span class="tag x">取消</span>' : '';
+  return `<button class="row" data-k="${esc(s.key)}" onclick="openShipment(this.dataset.k)">
+    <div class="m"><div class="t">${esc(s.cust || '（未填客戶）')}${tag}</div>
+      <div class="s">${esc(s.date.slice(5).replace('-','/'))}　${esc(items.join('、'))}</div></div>
+    <div class="r"><b class="num">${money(s.total)}</b><small class="num ${s.profit < 0 ? 'neg' : ''}">淨利 ${money(s.profit)}</small></div>
+  </button>`;
+}
+
+/* ================= 訂單列表 ================= */
+function renderOrders() {
+  const all = shipments(DB.orders); SHIPS = all;
+  const cnt = st => all.filter(s => s.status === st).length;
+  $('oFilter').innerHTML = [['all','全部'],['未出貨','未出貨 ' + cnt('未出貨')],['已出貨','已出貨'],['取消','取消']]
+    .map(([k,l]) => `<button class="chip ${oFilter === k ? 'on' : ''}" onclick="oFilter='${k}';renderOrders()">${l}</button>`).join('');
+  const q = $('oq').value.trim().toLowerCase();
+  let list = all.filter(s => oFilter === 'all' || s.status === oFilter);
+  if (q) list = list.filter(s => (s.cust + ' ' + s.rows.map(r => [r['品項'], r['備註'], r['產品編號']].join(' ')).join(' ')).toLowerCase().includes(q));
+  if (!list.length) { $('oList').innerHTML = `<div class="empty">${DB.orders.length ? '沒有符合的訂單' : '載入中…'}</div>`; return; }
+  const limit = q ? 300 : 120;
+  let html = '', curM = '';
+  const byM = {};
+  list.forEach(s => { const k = s.date.slice(0,7); byM[k] = byM[k] || { t:0, p:0 }; byM[k].t += s.total; byM[k].p += s.profit; });
+  let open = false;
+  list.slice(0, limit).forEach(s => {
+    const k = s.date.slice(0,7);
+    if (k !== curM) {
+      if (open) html += '</div>';
+      curM = k;
+      html += `<div class="month-h"><span>${k.replace('-',' 年 ')} 月</span><span class="num">${money(byM[k].t)}　淨利 ${money(byM[k].p)}</span></div><div class="list">`;
+      open = true;
+    }
+    html += shipRow(s);
+  });
+  if (open) html += '</div>';
+  if (list.length > limit) html += `<div class="empty">只顯示最近 ${limit} 筆，用搜尋找更早的訂單</div>`;
+  $('oList').innerHTML = html;
+}
+
+/* ================= 出貨單詳情 ================= */
+const findShip = key => shipments(DB.orders).find(x => x.key === key);
+function openShipment(key) {
+  const s = findShip(key); if (!s) { closeSheet(); return; }
+  CUR_SHIP = key;
+  const c = DB.customers.find(x => x['客戶姓名'] === s.cust);
+  const lines = s.rows.map(r => {
+    const bag = isBagName(r['品項']);
+    return `<div class="oline">
+      <div class="oline-h" style="margin:0"><div style="flex:1"><b>${esc(r['品項'] || '（未填品項）')}</b>${bag ? '<span class="tag b">茶包</span>' : ''}${r['訂單狀態'] === '取消' ? '<span class="tag x">取消</span>' : ''}
+        <div class="s" style="font-size:12px;color:var(--ink-2)">${num(r['價位'])} 元 × ${num(r['斤數'])} ${bag ? '' : '斤'}　成本 ${num(r['單斤成本'])}${r['產品編號'] ? '　' + esc(r['產品編號']) : ''}</div></div>
+        <div style="text-align:right"><b class="num">${money(r['總金額'])}</b><div class="num" style="font-size:12px;color:${num(r['淨利']) < 0 ? 'var(--red)' : 'var(--leaf)'}">淨利 ${money(r['淨利'])}</div></div></div>
+      ${(num(r['箱子']) || num(r['運費']) || num(r['手續費'])) ? `<div class="hint" style="margin:6px 0 0">箱子 ${num(r['箱子'])}　運費 ${num(r['運費'])}　手續費 ${num(r['手續費'])}</div>` : ''}
+      ${r['備註'] ? `<div class="hint" style="margin:4px 0 0">備註：${esc(r['備註'])}</div>` : ''}
+      <div class="oline-f"><span class="sp"></span><button class="link" onclick="openLineEdit(${r._rowIndex})">編輯</button><button class="link red" onclick="deleteLine(${r._rowIndex})">刪除</button></div>
+    </div>`;
+  }).join('');
+  openSheet(`
+    <div class="sheet-h"><h2>${esc(s.cust || '（未填客戶）')}</h2><button onclick="closeSheet()">關閉</button></div>
+    <div class="sheet-b">
+      <div class="hint" style="margin:0 0 10px">${esc(s.date)}${c && c['電話'] ? '　' + esc(c['電話']) : ''}${c && c['地址'] ? '<br>' + esc(c['地址']) : ''}</div>
+      <div class="fld"><label>訂單狀態（整張一起改）</label>
+        <div class="seg">${STATUSES.map(st => `<button class="${s.status === st ? 'on' : ''}" onclick="setShipStatus('${st}')">${st}</button>`).join('')}</div></div>
+      ${lines}
+      <div class="box"><div class="kv"><span>總金額</span><b class="num">${money(s.total)}</b></div><div class="kv"><span>淨利</span><b class="num" style="color:var(--leaf)">${money(s.profit)}</b></div></div>
+      <button class="btn ghost" onclick="addToShip()">＋ 在這張訂單加品項</button>
+    </div>`);
+}
+
+function addToShip() { const s = findShip(CUR_SHIP); if (s) openOrderForm({ cust:s.cust, date:s.date, addTo:true }); }
+async function setShipStatus(st) {
+  const s = findShip(CUR_SHIP); if (!s) return;
+  const todo = s.rows.filter(r => (r['訂單狀態'] || '已出貨') !== st);
+  if (!todo.length) return;
+  document.querySelectorAll('.seg button').forEach(b => b.disabled = true);
+  try {
+    for (const r of todo) await updRow(SH.orders, r._rowIndex, { ...clean(r), '訂單狀態': st });
+    todo.forEach(r => r['訂單狀態'] = st);
+    saveCache(); renderAll();
+    toast('已改為「' + st + '」');
+    openShipment(s.key);
+  } catch(e) { toast('更新失敗：' + e.message); openShipment(s.key); }
+}
+
+async function deleteLine(rowIndex) {
+  const r = DB.orders.find(o => o._rowIndex === rowIndex); if (!r) return;
+  if (!confirm(`刪除「${r['客戶資料']}／${r['品項']}」這一列？刪除後無法復原。`)) return;
+  try {
+    await delRow(SH.orders, rowIndex);
+    closeSheet(); toast('已刪除');
+    await refreshAll();   // 刪除會讓下方列號位移，必須重新讀取
+  } catch(e) { toast('刪除失敗：' + e.message); }
+}
+
+/* ================= 新增訂單（一張訂單多品項） ================= */
+let DRAFT = null;
+function newLine() { return { item:'', price:'', qty:'', cost:'', pid:'', bag:false, bagManual:false, leaf:'', roast:'', deox:'', man:{}, open:false }; }
+
+function openOrderForm(pre = {}) {
+  DRAFT = { cust: pre.cust || '', date: pre.date || today(), status: '已出貨', note: '', addTo: !!pre.addTo,
+            box: pre.addTo ? 0 : '', ship: pre.addTo ? 0 : '', fee: pre.addTo ? 0 : '', lines: [newLine()] };
+  const custOpts = DB.customers.map(c => `<option value="${esc(c['客戶姓名'])}">`).join('');
+  openSheet(`
+    <div class="sheet-h"><h2>${DRAFT.addTo ? '加品項到這張訂單' : '新增訂單'}</h2><button onclick="closeSheet()">取消</button></div>
+    <div class="sheet-b" id="ofBody">
+      <div class="fld"><label>客戶</label><input class="in" id="of_cust" list="custDL" value="${esc(DRAFT.cust)}" placeholder="輸入姓名" oninput="DRAFT.cust=this.value" autocomplete="off"><datalist id="custDL">${custOpts}</datalist></div>
+      <div class="grid2">
+        <div class="fld"><label>日期</label><input class="in" type="date" value="${DRAFT.date}" oninput="DRAFT.date=this.value"></div>
+        <div class="fld"><label>狀態</label><select class="in" oninput="DRAFT.status=this.value">${STATUSES.map(s => `<option>${s}</option>`).join('')}</select></div>
+      </div>
+      <div id="ofLines"></div>
+      <button class="add-line" onclick="DRAFT.lines.push(newLine());renderLines(true)">＋ 再加一個品項</button>
+      <div class="box">
+        <div class="box-t">整張訂單的費用<span class="hint" style="font-weight:400;margin-left:6px">${DRAFT.addTo ? '原訂單已記過，通常填 0' : '記在第一列'}</span></div>
+        ${qRow('箱子','box',SET.boxChips)}${qRow('運費','ship',SET.shipChips)}${qRow('手續費','fee',SET.feeChips)}
+      </div>
+      <div class="fld"><label>備註</label><input class="in" oninput="DRAFT.note=this.value" placeholder="選填，記在第一列"></div>
+    </div>
+    <div class="sheet-f">
+      <div class="sum"><div><span>總金額</span><b class="num" id="ofTotal">$0</b></div><div><span>淨利</span><b class="num pos" id="ofProfit">$0</b></div></div>
+      <button class="btn" id="ofSave" onclick="saveOrder()">儲存訂單</button>
+    </div>`);
+  renderLines();
+}
+
+function qRow(label, key, chips) {
+  return `<div class="qrow"><span>${label}</span>
+    <input class="in num" type="number" inputmode="decimal" id="of_${key}" value="${DRAFT[key]}" placeholder="0" oninput="DRAFT.${key}=this.value;markChips('${key}');calcDraft()">
+    <div class="chips" id="ch_${key}">${chipList(chips).map(v => `<button class="chip" data-v="${v}" onclick="pickChip('${key}',${v})">${v}</button>`).join('')}</div></div>`;
+}
+function pickChip(key, v) { DRAFT[key] = v; $('of_' + key).value = v; markChips(key); calcDraft(); }
+function markChips(key) {
+  document.querySelectorAll('#ch_' + key + ' .chip').forEach(c => c.classList.toggle('on', DRAFT[key] !== '' && num(c.dataset.v) === num(DRAFT[key])));
+}
+
+function renderLines(focusLast) {
+  $('ofLines').innerHTML = DRAFT.lines.map((L, i) => `
+    <div class="oline">
+      <div class="oline-h"><span class="no">${i+1}</span>
+        <input class="in" id="ln_item_${i}" value="${esc(L.item)}" placeholder="品項（例：金萱中焙）" autocomplete="off" oninput="updLine(${i},'item',this.value)">
+        <button class="bag-t ${L.bag ? 'on' : ''}" id="ln_bag_${i}" onclick="toggleBag(${i})">茶包</button></div>
+      <div class="grid3">
+        <div class="fld"><label>價位（元/斤）</label><input class="in num" type="number" inputmode="decimal" value="${L.price}" oninput="updLine(${i},'price',this.value)"></div>
+        <div class="fld"><label id="ln_qlbl_${i}">${L.bag ? '數量' : '斤數'}</label><input class="in num" type="number" inputmode="decimal" step="0.125" value="${L.qty}" oninput="updLine(${i},'qty',this.value)"></div>
+        <div class="fld"><label>單斤成本</label><input class="in num" type="number" inputmode="decimal" value="${L.cost}" oninput="updLine(${i},'cost',this.value)"></div>
+      </div>
+      <div class="oline-f"><span>小計 <b class="num" id="ln_sub_${i}">$0</b></span><span class="sp"></span>
+        <button class="link" onclick="toggleDetail(${i})">成本細項</button>
+        ${DRAFT.lines.length > 1 ? `<button class="link red" onclick="DRAFT.lines.splice(${i},1);renderLines()">移除</button>` : ''}</div>
+      <div class="detail ${L.open ? 'open' : ''}" id="ln_det_${i}">
+        <div class="grid3">
+          <div class="fld"><label>茶葉消耗</label><input class="in num" type="number" inputmode="decimal" id="ln_leaf_${i}" value="${L.leaf}" oninput="updLine(${i},'leaf',this.value,true)"></div>
+          <div class="fld"><label>烘焙</label><input class="in num" type="number" inputmode="decimal" id="ln_roast_${i}" value="${L.roast}" oninput="updLine(${i},'roast',this.value,true)"></div>
+          <div class="fld"><label>脫氧+鋁袋</label><input class="in num" type="number" inputmode="decimal" id="ln_deox_${i}" value="${L.deox}" oninput="updLine(${i},'deox',this.value,true)"></div>
+        </div>
+        <div class="fld"><label>產品編號（選填）</label><input class="in" value="${esc(L.pid)}" oninput="DRAFT.lines[${i}].pid=this.value" placeholder="例：民二水gaba"></div>
+        <div class="hint">依斤數自動計算（每斤 ${SET.leaf}／${SET.roast}／${SET.deox}），可手動改。茶包不計。</div>
+      </div>
     </div>`).join('');
-
-  // 甜甜圈
-  const statusCount = { '已出貨': 0, '未出貨': 0, '取消': 0 };
-  orders.forEach(o => { const s = o['訂單狀態'] || '未出貨'; if (statusCount[s] !== undefined) statusCount[s]++; });
-  const total = Object.values(statusCount).reduce((a, b) => a + b, 0) || 1;
-  const colors = { '已出貨': '#2D6A4F', '未出貨': '#D4A017', '取消': '#8B1A1A' };
-  let offset = 0;
-  const circumference = 2 * Math.PI * 28;
-  let circles = '';
-  Object.entries(statusCount).forEach(([k, v]) => {
-    const frac = v / total;
-    const dash = frac * circumference;
-    circles += `<circle cx="40" cy="40" r="28" fill="none" stroke="${colors[k]}" stroke-width="14" stroke-dasharray="${dash.toFixed(1)} ${(circumference - dash).toFixed(1)}" stroke-dashoffset="${(-offset * circumference).toFixed(1)}" transform="rotate(-90 40 40)"/>`;
-    offset += frac;
-  });
-  document.getElementById('donutSvg').innerHTML = `<circle cx="40" cy="40" r="28" fill="none" stroke="#E8F3EE" stroke-width="14"/>${circles}<text x="40" y="44" text-anchor="middle" font-size="11" font-weight="600" fill="#2C2416">${Math.round(statusCount['已出貨'] / total * 100)}%</text>`;
-  document.getElementById('donutLegend').innerHTML = Object.entries(statusCount).map(([k, v]) =>
-    `<div class="leg-item"><div class="leg-dot" style="background:${colors[k]};"></div>${k} ${v} 筆</div>`).join('');
+  ['box','ship','fee'].forEach(markChips);
+  calcDraft();
+  if (focusLast) $('ln_item_' + (DRAFT.lines.length - 1))?.focus();
 }
-
-// ── 統計（以年為單位）──
-function buildStats() {
-  // 收集所有年份
-  const yearSet = new Set();
-  orders.forEach(o => {
-    const y = o['日期'] ? new Date(o['日期']).getFullYear() : null;
-    if (y && y > 2000) yearSet.add(y);
-  });
-  const years = [...yearSet].sort((a, b) => b - a);
-  if (!selectedYear || !yearSet.has(selectedYear)) selectedYear = years[0];
-
-  // 年份選擇器
-  document.getElementById('yearTabs').innerHTML = years.map(y => `
-    <div class="year-tab ${y === selectedYear ? 'active' : ''}" onclick="selectYear(${y})">${y} 年</div>
-  `).join('');
-
-  const yo = orders.filter(o => o['日期'] && new Date(o['日期']).getFullYear() === selectedYear);
-
-  // 月度營收 vs 淨利長條圖
-  const monthlyRev  = Array(12).fill(0);
-  const monthlyProfit = Array(12).fill(0);
-  yo.forEach(o => {
-    const m = new Date(o['日期']).getMonth();
-    monthlyRev[m]   += Number(o['總金額'] || 0);
-    monthlyProfit[m]+= Number(o['淨利']   || 0);
-  });
-  const maxMV = Math.max(...monthlyRev, 1);
-  document.getElementById('yearMonthChart').innerHTML = `
-    <div style="display:flex;align-items:flex-end;gap:3px;height:90px;margin-bottom:4px;">
-      ${monthlyRev.map((v, i) => `
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;">
-          <div style="width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:72px;gap:1px;">
-            <div style="width:60%;height:${Math.round(monthlyProfit[i]/maxMV*68)}px;background:#9FD1B6;border-radius:2px 2px 0 0;min-height:${monthlyProfit[i]>0?2:0}px;"></div>
-            <div style="width:100%;height:${Math.round(v/maxMV*68)}px;background:var(--green);border-radius:2px 2px 0 0;opacity:.7;min-height:${v>0?2:0}px;"></div>
-          </div>
-          <div style="font-size:9px;color:var(--text3);">${i+1}月</div>
-        </div>`).join('')}
-    </div>
-    <div style="display:flex;gap:12px;margin-top:4px;">
-      <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text2);"><div style="width:10px;height:10px;background:var(--green);border-radius:2px;opacity:.7;"></div>營收</div>
-      <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text2);"><div style="width:10px;height:10px;background:#9FD1B6;border-radius:2px;"></div>淨利</div>
-    </div>`;
-
-  // 品項排行（該年）
-  const prodMap = {};
-  yo.forEach(o => { const k = o['品項']||'其他'; prodMap[k] = (prodMap[k]||0) + Number(o['總金額']||0); });
-  const prods = Object.entries(prodMap).sort((a,b)=>b[1]-a[1]).slice(0,6);
-  const maxP = prods[0]?.[1]||1;
-  document.getElementById('productChart').innerHTML = prods.length ? prods.map(([k,v]) => `
-    <div class="bar-row">
-      <div class="bar-lbl">${k}</div>
-      <div class="bar-bg"><div class="bar-fill" style="width:${Math.round(v/maxP*100)}%;background:var(--green);"><span class="bar-val">$${Math.round(v/1000)}k</span></div></div>
-    </div>`).join('') : '<div class="empty">本年無資料</div>';
-
-  // 客戶排行（該年）
-  const custMap = {};
-  yo.forEach(o => { const k = o['客戶資料']||'未知'; custMap[k] = (custMap[k]||0) + Number(o['總金額']||0); });
-  const custs = Object.entries(custMap).sort((a,b)=>b[1]-a[1]).slice(0,6);
-  const maxC = custs[0]?.[1]||1;
-  document.getElementById('customerChart').innerHTML = custs.length ? custs.map(([k,v],i) => `
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-      <div style="font-size:12px;color:var(--text2);width:16px;">${i+1}</div>
-      <div style="flex:1;">
-        <div style="font-size:13px;color:var(--text);">${k}</div>
-        <div style="height:4px;background:var(--bg2);border-radius:2px;margin-top:3px;"><div style="height:100%;width:${Math.round(v/maxC*100)}%;background:#9FD1B6;border-radius:2px;"></div></div>
-      </div>
-      <div style="font-size:12px;color:var(--text2);">$${Math.round(v).toLocaleString()}</div>
-    </div>`).join('') : '<div class="empty">本年無資料</div>';
-
-  // 年度總計橫排
-  const yRev    = yo.reduce((s,o) => s + Number(o['總金額']||0), 0);
-  const yProfit = yo.reduce((s,o) => s + Number(o['淨利']||0), 0);
-  const yCount  = yo.length;
-  const yMargin = yRev ? Math.round(yProfit/yRev*100) : 0;
-  document.getElementById('yearSummary').innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;">
-      <div style="background:var(--bg2);border-radius:8px;padding:10px;">
-        <div style="font-size:11px;color:var(--text2);">總營收</div>
-        <div style="font-size:18px;font-weight:600;color:var(--green);">$${yRev.toLocaleString()}</div>
-      </div>
-      <div style="background:var(--bg2);border-radius:8px;padding:10px;">
-        <div style="font-size:11px;color:var(--text2);">總淨利</div>
-        <div style="font-size:18px;font-weight:600;color:${yProfit>=0?'var(--green)':'var(--red)'};">$${Math.round(yProfit).toLocaleString()}</div>
-      </div>
-      <div style="background:var(--bg2);border-radius:8px;padding:10px;">
-        <div style="font-size:11px;color:var(--text2);">訂單數</div>
-        <div style="font-size:18px;font-weight:600;color:var(--text);">${yCount} 筆</div>
-      </div>
-      <div style="background:var(--bg2);border-radius:8px;padding:10px;">
-        <div style="font-size:11px;color:var(--text2);">毛利率</div>
-        <div style="font-size:18px;font-weight:600;color:var(--amber);">${yMargin}%</div>
-      </div>
-    </div>`;
+function toggleDetail(i) { const L = DRAFT.lines[i]; L.open = !L.open; $('ln_det_' + i).classList.toggle('open', L.open); }
+function toggleBag(i) {
+  const L = DRAFT.lines[i]; L.bag = !L.bag; L.bagManual = true;
+  $('ln_bag_' + i).classList.toggle('on', L.bag); $('ln_qlbl_' + i).textContent = L.bag ? '數量' : '斤數';
+  calcDraft();
 }
-
-function selectYear(y) {
-  selectedYear = y;
-  buildStats();
-}
-
-// ── 年度報表 ──
-function renderAnnual(data) {
-  if (!data.length) { document.getElementById('annual-content').innerHTML = '<div class="empty">無年度資料</div>'; return; }
-  const html = data.map(r => {
-    const yr     = Math.round(Number(r['年度']));
-    const rev    = Number(r['總營業額']||0);
-    const profit = Number(r['總利潤']||0);
-    const margin = rev ? Math.round(profit/rev*100) : 0;
-    const teaJin = Number(r['年度茶葉銷量']||0);
-    const bagPcs = Number(r['年度茶包銷量']||0);
-    const buyJin = Number(r['年度購買總斤數']||0);
-    const buyCost= Number(r['購買總金額']||0);
-    return `
-    <div class="chart-card" style="margin-bottom:12px;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div style="font-size:16px;font-weight:700;color:var(--text);">${yr} 年</div>
-        <div style="font-size:12px;padding:3px 10px;border-radius:20px;background:${margin>=20?'var(--green-l)':'var(--amber-l)'};color:${margin>=20?'var(--green-t)':'var(--amber)'};">毛利率 ${margin}%</div>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px;">
-        <div style="background:var(--bg2);border-radius:8px;padding:10px;">
-          <div style="font-size:11px;color:var(--text2);">總營業額</div>
-          <div style="font-size:17px;font-weight:600;color:var(--green);">$${Math.round(rev).toLocaleString()}</div>
-        </div>
-        <div style="background:var(--bg2);border-radius:8px;padding:10px;">
-          <div style="font-size:11px;color:var(--text2);">總利潤</div>
-          <div style="font-size:17px;font-weight:600;color:${profit>=0?'var(--green)':'var(--red)'};">$${Math.round(profit).toLocaleString()}</div>
-        </div>
-        <div style="background:var(--bg2);border-radius:8px;padding:10px;">
-          <div style="font-size:11px;color:var(--text2);">茶葉銷量</div>
-          <div style="font-size:17px;font-weight:600;color:var(--text);">${teaJin} 斤</div>
-        </div>
-        <div style="background:var(--bg2);border-radius:8px;padding:10px;">
-          <div style="font-size:11px;color:var(--text2);">茶包銷量</div>
-          <div style="font-size:17px;font-weight:600;color:var(--text);">${bagPcs} 包</div>
-        </div>
-        <div style="background:var(--bg2);border-radius:8px;padding:10px;">
-          <div style="font-size:11px;color:var(--text2);">購買茶乾</div>
-          <div style="font-size:17px;font-weight:600;color:var(--amber);">${buyJin} 斤</div>
-        </div>
-        <div style="background:var(--bg2);border-radius:8px;padding:10px;">
-          <div style="font-size:11px;color:var(--text2);">茶乾支出</div>
-          <div style="font-size:17px;font-weight:600;color:var(--amber);">$${Math.round(buyCost).toLocaleString()}</div>
-        </div>
-      </div>
-    </div>`;
-  }).join('');
-  document.getElementById('annual-content').innerHTML = html;
-}
-
-// ── 品項統計 ──
-let allItemsData = [];
-function renderItems(data) {
-  allItemsData = data;
-  const years = [];
-  if (data[0]) {
-    Object.keys(data[0]).forEach(k => { if (/^\d{4}總數量$/.test(k)) years.push(k.replace('總數量','')); });
+function updLine(i, f, v, manual) {
+  const L = DRAFT.lines[i]; L[f] = v;
+  if (manual) L.man[f] = v !== '';
+  if (f === 'item' && !L.bagManual) {
+    L.bag = isBagName(v);
+    $('ln_bag_' + i).classList.toggle('on', L.bag); $('ln_qlbl_' + i).textContent = L.bag ? '數量' : '斤數';
   }
-  // 分茶葉/茶包
-  const teaItems  = data.filter(r => r['單位']==='斤');
-  const bagItems  = data.filter(r => r['單位']==='包');
-
-  const buildTable = (list, title) => {
-    if (!list.length) return '';
-    return `
-    <div class="chart-card" style="margin-bottom:12px;">
-      <div class="chart-title">${title}</div>
-      <div style="overflow-x:auto;">
-        <table style="width:100%;border-collapse:collapse;font-size:12px;">
-          <thead>
-            <tr style="background:var(--bg2);">
-              <th style="padding:6px 8px;text-align:left;color:var(--text2);white-space:nowrap;">品項</th>
-              ${years.map(y=>`<th style="padding:6px 8px;text-align:right;color:var(--text2);">${y}</th>`).join('')}
-            </tr>
-          </thead>
-          <tbody>
-            ${list.map((r,i) => `
-            <tr style="border-bottom:0.5px solid var(--bg2);background:${i%2?'':'var(--card)'};">
-              <td style="padding:7px 8px;color:var(--text);font-weight:500;">${r['品項名稱']}</td>
-              ${years.map(y => {
-                const v = Number(r[y+'總數量']||0);
-                return `<td style="padding:7px 8px;text-align:right;color:${v>0?'var(--text)':'var(--text3)'};">${v>0?v:'-'}</td>`;
-              }).join('')}
-            </tr>`).join('')}
-          </tbody>
-        </table>
-      </div>
-    </div>`;
-  };
-
-  document.getElementById('items-content').innerHTML =
-    buildTable(teaItems,'🍃 茶葉銷售（斤）') +
-    buildTable(bagItems,'🫖 茶包銷售（包）');
+  calcDraft();
 }
-
-function filterItems(q) {
-  const sq = (q || '').trim();
-  const list = sq ? allItemsData.filter(r => (r['品項名稱']||'').includes(sq)) : allItemsData;
-  renderItems(list);
-}
-
-// ── 茶乾購買 ──
-let allPurchaseData = [];
-function renderPurchase(data) {
-  allPurchaseData = data;
-  // 統計各供應商總金額
-  const supplierMap = {};
-  data.forEach(r => {
-    const name = r['姓名']||'未知';
-    const total = Number(r['斤數']||0) * Number(r['價錢/斤']||0);
-    supplierMap[name] = (supplierMap[name]||0) + total;
-  });
-  const suppliers = Object.entries(supplierMap).sort((a,b)=>b[1]-a[1]);
-  const totalBuy  = data.reduce((s,r) => s + Number(r['斤數']||0) * Number(r['價錢/斤']||0), 0);
-  const totalJin  = data.reduce((s,r) => s + Number(r['斤數']||0), 0);
-
-  const summaryHtml = `
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;">
-      <div class="stat-card"><div class="stat-label">購買總斤數</div><div class="stat-value amber">${totalJin} 斤</div></div>
-      <div class="stat-card"><div class="stat-label">購買總金額</div><div class="stat-value amber">$${Math.round(totalBuy).toLocaleString()}</div></div>
-    </div>
-    <div class="chart-card" style="margin-bottom:12px;">
-      <div class="chart-title">供應商排行</div>
-      ${suppliers.map(([k,v],i) => {
-        const maxV = suppliers[0][1]||1;
-        return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-          <div style="font-size:12px;color:var(--text2);width:16px;">${i+1}</div>
-          <div style="flex:1;">
-            <div style="font-size:13px;color:var(--text);">${k}</div>
-            <div style="height:4px;background:var(--bg2);border-radius:2px;margin-top:3px;"><div style="height:100%;width:${Math.round(v/maxV*100)}%;background:var(--amber);border-radius:2px;opacity:.7;"></div></div>
-          </div>
-          <div style="font-size:12px;color:var(--amber);font-weight:500;">$${Math.round(v).toLocaleString()}</div>
-        </div>`;
-      }).join('')}
-    </div>`;
-
-  const listHtml = data.map(r => {
-    const jin   = Number(r['斤數']||0);
-    const price = Number(r['價錢/斤']||0);
-    const total = jin * price;
-    const idx   = r._rowIndex;
-    return `<div class="rec-card">
-      <div class="rec-top">
-        <div class="rec-name">${r['姓名']||'未知'}</div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div class="rec-amount" style="color:var(--amber);">$${total?Math.round(total).toLocaleString():'—'}</div>
-          <button onclick="editPurchase(${idx})" class="icon-btn" title="編輯">✏️</button>
-          <button onclick="deletePurchase(${idx},'${(r['姓名']||'').replace(/'/g,'')}','${(r['品項']||'').replace(/'/g,'')}')" class="icon-btn" title="刪除">🗑️</button>
-        </div>
-      </div>
-      <div class="rec-meta">
-        <span class="rec-detail">${r['日期']||''}</span>
-        <span class="rec-detail"><b>${r['品項']||''}</b></span>
-        <span class="rec-detail">${jin?jin+'斤':''}</span>
-        ${price?`<span class="rec-detail">$${price}/斤</span>`:''}
-      </div>
-      ${r['備註']?`<div class="rec-addr" style="margin-top:4px;">備註：${r['備註']}</div>`:''}
-    </div>`;
-  }).join('');
-
-  document.getElementById('purchase-content').innerHTML = summaryHtml + listHtml;
-}
-
-function filterPurchase(q) {
-  const sq = (q || '').trim();
-  const list = sq ? allPurchaseData.filter(r =>
-    (r['姓名']||'').includes(sq) || (r['品項']||'').includes(sq) || (r['日期']||'').includes(sq)
-  ) : allPurchaseData;
-  renderPurchase(list);
-}
-
-// ══════════════════════════════
-// 編輯訂單
-// ══════════════════════════════
-function editOrder(rowIndex) {
-  const r = orders.find(o => o._rowIndex === rowIndex);
-  if (!r) return;
-  const custOptions = customers.map(c => `<option>${c['客戶姓名']||''}</option>`).join('');
-  const html = `
-    <div class="modal-handle"></div>
-    <div class="modal-title">編輯訂單</div>
-    <div class="form-group"><label class="form-label">客戶</label>
-      <input class="form-input" id="eo_cust" list="eCustList" value="${r['客戶資料']||''}">
-      <datalist id="eCustList">${custOptions}</datalist>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">日期</label><input class="form-input" id="eo_date" type="date" value="${r['日期']||''}"></div>
-      <div class="form-group"><label class="form-label">訂單狀態</label>
-        <select class="form-input" id="eo_status">
-          ${['已出貨','未出貨','取消'].map(s=>`<option ${r['訂單狀態']===s?'selected':''}>${s}</option>`).join('')}
-        </select>
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">品項</label><input class="form-input" id="eo_item" value="${r['品項']||''}"></div>
-      <div class="form-group"><label class="form-label">產品編號</label><input class="form-input" id="eo_prodid" value="${r['產品編號']||''}"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">價位（元/斤）</label><input class="form-input" id="eo_price" type="number" value="${r['價位']||''}"></div>
-      <div class="form-group"><label class="form-label">斤數</label><input class="form-input" id="eo_qty" type="number" step="0.125" value="${r['斤數']||''}"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">總金額</label><input class="form-input" id="eo_total" type="number" value="${r['總金額']||''}"></div>
-      <div class="form-group"><label class="form-label">單斤成本</label><input class="form-input" id="eo_cost" type="number" value="${r['單斤成本']||''}"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">烘焙</label><input class="form-input" id="eo_roast" type="number" value="${r['烘焙']||''}"></div>
-      <div class="form-group"><label class="form-label">脫氧+鋁袋</label><input class="form-input" id="eo_deox" type="number" value="${r['脫氧+鋁袋']||''}"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">運費</label><input class="form-input" id="eo_ship" type="number" value="${r['運費']||0}"></div>
-      <div class="form-group"><label class="form-label">手續費</label><input class="form-input" id="eo_fee" type="number" value="${r['手續費']||0}"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">箱子</label><input class="form-input" id="eo_box" type="number" value="${r['箱子']||0}"></div>
-      <div class="form-group"><label class="form-label">淨利</label><input class="form-input" id="eo_profit" type="number" value="${r['淨利']||''}"></div>
-    </div>
-    <div class="form-group"><label class="form-label">備註</label><input class="form-input" id="eo_note" value="${r['備註']||''}"></div>
-    <button class="btn-primary" id="updateOrderBtn" onclick="updateOrder(${rowIndex})">儲存變更</button>
-    <button class="btn-cancel" onclick="closeModal()">取消</button>`;
-  document.getElementById('modalBox').innerHTML = html;
-  document.getElementById('modalBg').classList.add('open');
-}
-
-async function updateOrder(rowIndex) {
-  const btn = document.getElementById('updateOrderBtn');
-  btn.disabled = true; btn.textContent = '儲存中…';
-  const r = orders.find(o => o._rowIndex === rowIndex);
-  const data = {
-    '訂單ID':        r['訂單ID']||'',
-    '日期':          document.getElementById('eo_date').value,
-    '客戶資料':      document.getElementById('eo_cust').value,
-    '品項':          document.getElementById('eo_item').value,
-    '價位':          document.getElementById('eo_price').value,
-    '斤數':          document.getElementById('eo_qty').value,
-    '總金額':        document.getElementById('eo_total').value,
-    '產品編號':      document.getElementById('eo_prodid').value,
-    '單斤成本':      document.getElementById('eo_cost').value,
-    '茶葉*斤數成本': Number(document.getElementById('eo_qty').value||0)*Number(document.getElementById('eo_cost').value||0),
-    '茶葉消耗':      r['茶葉消耗']||'',
-    '烘焙':          document.getElementById('eo_roast').value,
-    '脫氧+鋁袋':     document.getElementById('eo_deox').value,
-    '箱子':          document.getElementById('eo_box').value,
-    '運費':          document.getElementById('eo_ship').value,
-    '手續費':        document.getElementById('eo_fee').value,
-    '淨利':          document.getElementById('eo_profit').value,
-    '備註':          document.getElementById('eo_note').value,
-    '訂單狀態':      document.getElementById('eo_status').value,
-  };
-  try {
-    const res = await apiUpdateRow('訂單紀錄', rowIndex, data);
-    if (res.error) throw new Error(res.error);
-    showToast('✓ 訂單已更新');
-    closeModal();
-    await loadOrders();
-  } catch(e) {
-    showToast('錯誤：' + e.message);
-    btn.disabled = false; btn.textContent = '儲存變更';
-  }
-}
-
-function deleteOrder(rowIndex, name, item) {
-  confirmDelete(`確定要刪除「${name} — ${item}」這筆訂單嗎？此操作無法復原。`, async () => {
-    showToast('刪除中…');
-    try {
-      const res = await apiDeleteRow('訂單紀錄', rowIndex);
-      if (res.error) throw new Error(res.error);
-      showToast('✓ 訂單已刪除');
-      await loadOrders();
-    } catch(e) { showToast('錯誤：' + e.message); }
+// 自動細項：非手動欄位依斤數 × 每斤費用
+function autoLine(L, i) {
+  const q = num(L.qty);
+  [['leaf', SET.leaf], ['roast', SET.roast], ['deox', SET.deox]].forEach(([f, rate]) => {
+    if (L.man[f]) return;
+    L[f] = L.bag || !q ? (q ? 0 : '') : +(q * num(rate)).toFixed(2);
+    const el = $('ln_' + f + '_' + i); if (el && document.activeElement !== el) el.value = L[f];
   });
 }
-
-// ══════════════════════════════
-// 編輯客戶
-// ══════════════════════════════
-function editCustomer(rowIndex) {
-  const c = customers.find(c => c._rowIndex === rowIndex);
-  if (!c) return;
-  const html = `
-    <div class="modal-handle"></div>
-    <div class="modal-title">編輯客戶</div>
-    <div class="form-group"><label class="form-label">客戶姓名</label><input class="form-input" id="ec_name" value="${c['客戶姓名']||''}"></div>
-    <div class="form-group"><label class="form-label">電話</label><input class="form-input" id="ec_phone" type="tel" value="${c['電話']||''}"></div>
-    <div class="form-group"><label class="form-label">Line 名稱</label><input class="form-input" id="ec_line" value="${c['Line名稱']||''}"></div>
-    <div class="form-group"><label class="form-label">地址</label><input class="form-input" id="ec_addr" value="${c['地址']||''}"></div>
-    <div class="form-group"><label class="form-label">口味偏好 / 備註</label><input class="form-input" id="ec_note" value="${c['口味偏好/備註']||''}"></div>
-    <button class="btn-primary" id="updateCustBtn" onclick="updateCustomer(${rowIndex})">儲存變更</button>
-    <button class="btn-cancel" onclick="closeModal()">取消</button>`;
-  document.getElementById('modalBox').innerHTML = html;
-  document.getElementById('modalBg').classList.add('open');
+function lineCalc(L, first) {
+  const total = num(L.price) * num(L.qty);
+  const leafCost = num(L.qty) * num(L.cost);
+  const extra = L.bag ? 0 : num(L.leaf) + num(L.roast) + num(L.deox);
+  const fees = first ? num(DRAFT.box) + num(DRAFT.ship) + num(DRAFT.fee) : 0;
+  return { total, leafCost, profit: total - leafCost - extra - fees };
 }
-
-async function updateCustomer(rowIndex) {
-  const btn = document.getElementById('updateCustBtn');
-  btn.disabled = true; btn.textContent = '儲存中…';
-  const c = customers.find(c => c._rowIndex === rowIndex);
-  const data = {
-    'ID':           c['ID']||'',
-    '電話':         document.getElementById('ec_phone').value,
-    '客戶姓名':     document.getElementById('ec_name').value,
-    'Line名稱':     document.getElementById('ec_line').value,
-    '口味偏好/備註':document.getElementById('ec_note').value,
-    '地址':         document.getElementById('ec_addr').value,
-    '建檔日期':     c['建檔日期']||'',
-  };
-  try {
-    const res = await apiUpdateRow('客戶資料', rowIndex, data);
-    if (res.error) throw new Error(res.error);
-    showToast('✓ 客戶資料已更新');
-    closeModal();
-    await loadCustomers();
-  } catch(e) {
-    showToast('錯誤：' + e.message);
-    btn.disabled = false; btn.textContent = '儲存變更';
-  }
-}
-
-function deleteCustomer(rowIndex, name) {
-  confirmDelete(`確定要刪除客戶「${name}」嗎？客戶的訂單紀錄不會一起刪除。`, async () => {
-    showToast('刪除中…');
-    try {
-      const res = await apiDeleteRow('客戶資料', rowIndex);
-      if (res.error) throw new Error(res.error);
-      showToast('✓ 客戶已刪除');
-      await loadCustomers();
-    } catch(e) { showToast('錯誤：' + e.message); }
+function calcDraft() {
+  let t = 0, p = 0;
+  DRAFT.lines.forEach((L, i) => {
+    autoLine(L, i);
+    const c = lineCalc(L, i === 0);
+    t += c.total; p += c.profit;
+    const el = $('ln_sub_' + i); if (el) el.textContent = money(c.total);
   });
-}
-
-// ══════════════════════════════
-// 編輯茶乾購買
-// ══════════════════════════════
-function editPurchase(rowIndex) {
-  const r = allPurchaseData.find(p => p._rowIndex === rowIndex);
-  if (!r) return;
-  const html = `
-    <div class="modal-handle"></div>
-    <div class="modal-title">編輯茶乾購買</div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">供應商姓名</label><input class="form-input" id="ep_name" value="${r['姓名']||''}"></div>
-      <div class="form-group"><label class="form-label">日期</label><input class="form-input" id="ep_date" value="${r['日期']||''}"></div>
-    </div>
-    <div class="form-group"><label class="form-label">品項</label><input class="form-input" id="ep_item" value="${r['品項']||''}"></div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">斤數</label><input class="form-input" id="ep_jin" type="number" step="0.5" value="${r['斤數']||''}" oninput="calcEditPurchaseTotal()"></div>
-      <div class="form-group"><label class="form-label">價錢/斤</label><input class="form-input" id="ep_price" type="number" value="${r['價錢/斤']||''}" oninput="calcEditPurchaseTotal()"></div>
-    </div>
-    <div style="background:var(--amber-l);border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
-      <span style="font-size:13px;font-weight:500;color:var(--amber);">總價</span>
-      <span id="editPurchaseTotalDisplay" style="font-size:20px;font-weight:700;color:var(--amber);">$${Math.round(Number(r['斤數']||0)*Number(r['價錢/斤']||0)).toLocaleString()}</span>
-    </div>
-    <div class="form-group"><label class="form-label">備註</label><input class="form-input" id="ep_note" value="${r['備註']||''}"></div>
-    <button class="btn-primary" id="updatePurchaseBtn" onclick="updatePurchase(${rowIndex})" style="background:var(--amber);">儲存變更</button>
-    <button class="btn-cancel" onclick="closeModal()">取消</button>`;
-  document.getElementById('modalBox').innerHTML = html;
-  document.getElementById('modalBg').classList.add('open');
-}
-
-function calcEditPurchaseTotal() {
-  const jin   = parseFloat(document.getElementById('ep_jin')?.value)   || 0;
-  const price = parseFloat(document.getElementById('ep_price')?.value) || 0;
-  const el = document.getElementById('editPurchaseTotalDisplay');
-  if (el) el.textContent = '$' + Math.round(jin * price).toLocaleString();
-}
-
-async function updatePurchase(rowIndex) {
-  const btn = document.getElementById('updatePurchaseBtn');
-  btn.disabled = true; btn.textContent = '儲存中…';
-  const jin   = parseFloat(document.getElementById('ep_jin').value)   || 0;
-  const price = parseFloat(document.getElementById('ep_price').value) || 0;
-  const data = {
-    '姓名':    document.getElementById('ep_name').value,
-    '日期':    document.getElementById('ep_date').value,
-    '品項':    document.getElementById('ep_item').value,
-    '斤數':    jin,
-    '價錢/斤': price,
-    '總價':    jin * price,
-    '備註':    document.getElementById('ep_note').value,
-  };
-  try {
-    const res = await apiUpdateRow('茶乾購買', rowIndex, data);
-    if (res.error) throw new Error(res.error);
-    showToast('✓ 購買紀錄已更新');
-    closeModal();
-    purchaseLoaded = false;
-    await loadPurchase();
-  } catch(e) {
-    showToast('錯誤：' + e.message);
-    btn.disabled = false; btn.textContent = '儲存變更';
-  }
-}
-
-function deletePurchase(rowIndex, name, item) {
-  confirmDelete(`確定要刪除「${name} — ${item}」這筆購買紀錄嗎？`, async () => {
-    showToast('刪除中…');
-    try {
-      const res = await apiDeleteRow('茶乾購買', rowIndex);
-      if (res.error) throw new Error(res.error);
-      showToast('✓ 購買紀錄已刪除');
-      purchaseLoaded = false;
-      await loadPurchase();
-    } catch(e) { showToast('錯誤：' + e.message); }
-  });
-}
-
-let currentTab = 'dashboard';
-let selectedYear = null;
-
-function fabAction() {
-  if (currentTab === 'orders') openModal('order');
-  else if (currentTab === 'customers') openModal('customer');
-  else if (currentTab === 'purchase') openModal('purchase');
-}
-
-function switchTab(tab) {
-  currentTab = tab;
-  document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-  document.getElementById('tab-' + tab).classList.add('active');
-  document.querySelectorAll('.tab').forEach((el, i) => {
-    el.classList.toggle('active', ['dashboard','orders','customers','stats','annual','items','purchase'][i] === tab);
-  });
-  const fab = document.getElementById('globalFab');
-  fab.style.display = (tab === 'orders' || tab === 'customers' || tab === 'purchase') ? '' : 'none';
-
-  if (tab === 'orders') {
-    if (orders.length === 0) loadOrders(); else filterOrders('');
-  }
-  if (tab === 'customers') {
-    if (customers.length === 0) loadCustomers(); else filterCustomers('');
-  }
-  if (tab === 'stats')    loadStats();
-  if (tab === 'annual')   loadAnnual();
-  if (tab === 'items')    loadItems();
-  if (tab === 'purchase') loadPurchase();
-}
-
-// ── Modal ──
-function openModal(type) {
-  const today = new Date().toISOString().slice(0, 10);
-  let html = '';
-  if (type === 'order') {
-    const custOptions = customers.map(c => `<option>${c['客戶姓名'] || ''}</option>`).join('');
-    html = `
-      <div class="modal-handle"></div>
-      <div class="modal-title">新增訂單</div>
-
-      <div class="form-group"><label class="form-label">客戶</label>
-        <input class="form-input" id="o_cust" list="custList" placeholder="輸入或選擇客戶">
-        <datalist id="custList">${custOptions}</datalist>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">日期</label><input class="form-input" id="o_date" type="date" value="${today}"></div>
-        <div class="form-group"><label class="form-label">訂單狀態</label>
-          <select class="form-input" id="o_status"><option>已出貨</option><option>未出貨</option><option>取消</option></select>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">品項</label><input class="form-input" id="o_item" placeholder="例：gaba中焙" oninput="calcProfit()"></div>
-        <div class="form-group"><label class="form-label">產品編號</label><input class="form-input" id="o_prodid" placeholder="例：民二水gaba"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">價位（元/斤）</label><input class="form-input" id="o_price" type="number" placeholder="0" oninput="calcProfit()"></div>
-        <div class="form-group"><label class="form-label">斤數</label><input class="form-input" id="o_qty" type="number" step="0.125" placeholder="0" oninput="calcProfit()"></div>
-      </div>
-
-      <div style="background:var(--bg2);border-radius:8px;padding:10px 12px;margin-bottom:10px;">
-        <div style="font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:500;">💰 成本明細（自動計算，可手動調整）</div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">總金額</label><input class="form-input" id="o_total" type="number" placeholder="0" oninput="calcProfit()" style="background:var(--card);"></div>
-          <div class="form-group"><label class="form-label">單斤成本</label><input class="form-input" id="o_cost" type="number" placeholder="0" oninput="calcProfit()" style="background:var(--card);"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">茶葉*斤數成本</label><input class="form-input" id="o_leafcost" type="number" placeholder="自動" readonly style="background:#f0f0f0;color:var(--text2);"></div>
-          <div class="form-group"><label class="form-label">茶葉消耗</label><input class="form-input" id="o_leafuse" type="number" placeholder="自動" oninput="calcProfit()" style="background:var(--card);"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">烘焙</label><input class="form-input" id="o_roast" type="number" placeholder="自動" oninput="calcProfit()" style="background:var(--card);"></div>
-          <div class="form-group"><label class="form-label">脫氧+鋁袋</label><input class="form-input" id="o_deox" type="number" placeholder="自動" oninput="calcProfit()" style="background:var(--card);"></div>
-        </div>
-        <div class="form-row">
-          <div class="form-group"><label class="form-label">箱子</label><input class="form-input" id="o_box" type="number" placeholder="0" value="0" oninput="calcProfit()" style="background:var(--card);"></div>
-          <div class="form-group"><label class="form-label">運費</label><input class="form-input" id="o_ship" type="number" placeholder="0" value="0" oninput="calcProfit()" style="background:var(--card);"></div>
-        </div>
-        <div class="form-group"><label class="form-label">手續費</label><input class="form-input" id="o_fee" type="number" placeholder="0" value="0" oninput="calcProfit()" style="background:var(--card);"></div>
-      </div>
-
-      <div style="background:var(--green-l);border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:13px;font-weight:500;color:var(--green-t);">預估淨利</span>
-        <span id="profitDisplay" style="font-size:20px;font-weight:700;color:var(--green);">$0</span>
-      </div>
-
-      <div class="form-group"><label class="form-label">備註</label><input class="form-input" id="o_note" placeholder="選填"></div>
-      <button class="btn-primary" id="saveOrderBtn" onclick="saveOrder()">儲存訂單</button>
-      <button class="btn-cancel" onclick="closeModal()">取消</button>`;
-  } else if (type === 'purchase') {
-    html = `
-      <div class="modal-handle"></div>
-      <div class="modal-title">新增茶乾購買</div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">供應商姓名</label><input class="form-input" id="p_name" placeholder="例：民、玉周"></div>
-        <div class="form-group"><label class="form-label">日期</label><input class="form-input" id="p_date" type="text" placeholder="例：2026.6.9" value=""></div>
-      </div>
-      <div class="form-group"><label class="form-label">品項</label><input class="form-input" id="p_item" placeholder="例：金萱、gaba、烏龍"></div>
-      <div class="form-row">
-        <div class="form-group"><label class="form-label">斤數</label><input class="form-input" id="p_jin" type="number" step="0.5" placeholder="0" oninput="calcPurchaseTotal()"></div>
-        <div class="form-group"><label class="form-label">價錢/斤</label><input class="form-input" id="p_price" type="number" placeholder="0" oninput="calcPurchaseTotal()"></div>
-      </div>
-      <div style="background:var(--amber-l);border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:13px;font-weight:500;color:var(--amber);">總價</span>
-        <span id="purchaseTotalDisplay" style="font-size:20px;font-weight:700;color:var(--amber);">$0</span>
-      </div>
-      <div class="form-group"><label class="form-label">備註</label><input class="form-input" id="p_note" placeholder="選填"></div>
-      <button class="btn-primary" id="savePurchaseBtn" onclick="savePurchase()" style="background:var(--amber);">儲存購買紀錄</button>
-      <button class="btn-cancel" onclick="closeModal()">取消</button>`;
-  } else {
-    html = `
-      <div class="modal-handle"></div>
-      <div class="modal-title">新增客戶</div>
-      <div class="form-group"><label class="form-label">客戶姓名</label><input class="form-input" id="c_name" placeholder="姓名或暱稱"></div>
-      <div class="form-group"><label class="form-label">電話</label><input class="form-input" id="c_phone" type="tel" placeholder="0912-345-678"></div>
-      <div class="form-group"><label class="form-label">Line 名稱</label><input class="form-input" id="c_line" placeholder="選填"></div>
-      <div class="form-group"><label class="form-label">地址</label><input class="form-input" id="c_addr" placeholder="縣市、路名、門牌號"></div>
-      <div class="form-group"><label class="form-label">口味偏好 / 備註</label><input class="form-input" id="c_note" placeholder="例：喜歡輕焙、不喝紅茶"></div>
-      <button class="btn-primary" id="saveCustBtn" onclick="saveCustomer()">儲存客戶</button>
-      <button class="btn-cancel" onclick="closeModal()">取消</button>`;
-  }
-  document.getElementById('modalBox').innerHTML = html;
-  document.getElementById('modalBg').classList.add('open');
-}
-
-function closeModal() { document.getElementById('modalBg').classList.remove('open'); }
-
-// 自動計算淨利（依照 Excel 公式邏輯）
-function calcProfit() {
-  const price  = parseFloat(document.getElementById('o_price')?.value) || 0;
-  const qty    = parseFloat(document.getElementById('o_qty')?.value)   || 0;
-  const cost   = parseFloat(document.getElementById('o_cost')?.value)  || 0;
-  const item   = (document.getElementById('o_item')?.value || '').toLowerCase();
-  const isBag  = item.includes('茶包');
-
-  // 總金額自動填入
-  const total = price * qty;
-  if (document.getElementById('o_total') && price > 0 && qty > 0)
-    document.getElementById('o_total').value = total;
-
-  // 茶葉*斤數成本
-  const leafCost = qty * cost;
-  if (document.getElementById('o_leafcost'))
-    document.getElementById('o_leafcost').value = leafCost || '';
-
-  // 茶葉消耗、烘焙、脫氧（每斤固定值，可手動覆蓋）
-  const perJin = 50;
-  const deoxPerJin = 16;
-  if (qty > 0) {
-    const luEl = document.getElementById('o_leafuse');
-    const roEl = document.getElementById('o_roast');
-    const dxEl = document.getElementById('o_deox');
-    if (luEl && luEl.value === '') luEl.value = (qty * perJin).toFixed(2);
-    if (roEl && roEl.value === '') roEl.value = (qty * perJin).toFixed(2);
-    if (dxEl && dxEl.value === '') dxEl.value = (qty * deoxPerJin).toFixed(2);
-  }
-
-  const leafUse = parseFloat(document.getElementById('o_leafuse')?.value) || 0;
-  const roast   = parseFloat(document.getElementById('o_roast')?.value)   || 0;
-  const deox    = parseFloat(document.getElementById('o_deox')?.value)    || 0;
-  const box     = parseFloat(document.getElementById('o_box')?.value)     || 0;
-  const ship    = parseFloat(document.getElementById('o_ship')?.value)    || 0;
-  const fee     = parseFloat(document.getElementById('o_fee')?.value)     || 0;
-
-  let profit;
-  if (isBag) {
-    // 茶包：總金額 - 茶葉成本 - 箱子 - 運費 - 手續費
-    profit = total - leafCost - box - ship - fee;
-  } else {
-    // 一般茶：總金額 - 茶葉成本 - 茶葉消耗 - 烘焙 - 脫氧 - 箱子 - 運費 - 手續費
-    profit = total - leafCost - leafUse - roast - deox - box - ship - fee;
-  }
-
-  const el = document.getElementById('profitDisplay');
-  if (el) {
-    el.textContent = '$' + Math.round(profit).toLocaleString();
-    el.style.color = profit >= 0 ? 'var(--green)' : 'var(--red)';
-  }
+  $('ofTotal').textContent = money(t);
+  const pe = $('ofProfit'); pe.textContent = money(p); pe.className = 'num ' + (p < 0 ? 'neg' : 'pos');
 }
 
 async function saveOrder() {
-  const btn = document.getElementById('saveOrderBtn');
-  btn.disabled = true;
-  btn.textContent = '儲存中…';
-  const today = new Date().toISOString().slice(0, 10);
-  const qty   = parseFloat(document.getElementById('o_qty').value) || 0;
-  const price = parseFloat(document.getElementById('o_price').value) || 0;
-  const cost  = parseFloat(document.getElementById('o_cost').value) || 0;
-  const total = parseFloat(document.getElementById('o_total').value) || price * qty;
-  const leafCost = qty * cost;
-  const leafUse  = parseFloat(document.getElementById('o_leafuse').value) || 0;
-  const roast    = parseFloat(document.getElementById('o_roast').value)   || 0;
-  const deox     = parseFloat(document.getElementById('o_deox').value)    || 0;
-  const box      = parseFloat(document.getElementById('o_box').value)     || 0;
-  const ship     = parseFloat(document.getElementById('o_ship').value)    || 0;
-  const fee      = parseFloat(document.getElementById('o_fee').value)     || 0;
-  const item     = document.getElementById('o_item').value;
-  const isBag    = item.toLowerCase().includes('茶包');
-  const profit   = isBag
-    ? total - leafCost - box - ship - fee
-    : total - leafCost - leafUse - roast - deox - box - ship - fee;
-
-  const data = {
-    '訂單ID':       Math.random().toString(36).slice(2, 10).toUpperCase(),
-    '日期':         document.getElementById('o_date').value || today,
-    '客戶資料':     document.getElementById('o_cust').value,
-    '品項':         item,
-    '價位':         price,
-    '斤數':         qty,
-    '總金額':       total,
-    '產品編號':     document.getElementById('o_prodid').value,
-    '單斤成本':     cost,
-    '茶葉*斤數成本': leafCost,
-    '茶葉消耗':     leafUse,
-    '烘焙':         roast,
-    '脫氧+鋁袋':    deox,
-    '箱子':         box,
-    '運費':         ship,
-    '手續費':       fee,
-    '淨利':         Math.round(profit),
-    '備註':         document.getElementById('o_note').value,
-    '訂單狀態':     document.getElementById('o_status').value,
-  };
+  const cust = DRAFT.cust.trim();
+  const lines = DRAFT.lines.filter(L => L.item.trim() || num(L.qty));
+  if (!cust) { toast('請填客戶'); $('of_cust').focus(); return; }
+  if (!lines.length) { toast('至少要有一個品項'); return; }
+  const bad = lines.findIndex(L => !L.item.trim() || !num(L.qty));
+  if (bad >= 0) { toast(`第 ${bad+1} 個品項缺品項名稱或斤數`); return; }
+  const btn = $('ofSave'); btn.disabled = true;
+  const id = rid();
+  let done = 0;
   try {
-    const res = await apiAddRow('訂單紀錄', data);
-    if (res.error) throw new Error(res.error);
-    showToast('✓ 訂單已新增到 Google Sheets');
-    closeModal();
-    await loadOrders();
-  } catch (e) {
-    showToast('錯誤：' + e.message);
-    btn.disabled = false;
-    btn.textContent = '儲存訂單';
+    for (let i = 0; i < lines.length; i++) {
+      const L = lines[i], first = i === 0, c = lineCalc(L, first);
+      btn.textContent = lines.length > 1 ? `儲存中 ${i+1}/${lines.length}…` : '儲存中…';
+      await addRow(SH.orders, {
+        '訂單ID': id, '日期': DRAFT.date || today(), '客戶資料': cust, '品項': L.item.trim(),
+        '價位': num(L.price), '斤數': num(L.qty), '總金額': Math.round(c.total), '產品編號': L.pid.trim(),
+        '單斤成本': num(L.cost), '茶葉*斤數成本': Math.round(c.leafCost * 100) / 100,
+        '茶葉消耗': L.bag ? 0 : num(L.leaf), '烘焙': L.bag ? 0 : num(L.roast), '脫氧+鋁袋': L.bag ? 0 : num(L.deox),
+        '箱子': first ? num(DRAFT.box) : 0, '運費': first ? num(DRAFT.ship) : 0, '手續費': first ? num(DRAFT.fee) : 0,
+        '淨利': Math.round(c.profit * 10) / 10, '備註': first ? DRAFT.note.trim() : '', '訂單狀態': DRAFT.status,
+      });
+      done++;
+    }
+    // 新客戶自動建檔
+    if (!DB.customers.some(x => x['客戶姓名'] === cust)) {
+      try { await addRow(SH.cust, { 'ID': rid(), '客戶姓名': cust, '建檔日期': today() }); } catch(e) {}
+    }
+    closeSheet(); toast(`已儲存 ${done} 個品項`);
+    await refreshAll();
+  } catch(e) {
+    btn.disabled = false; btn.textContent = '儲存訂單';
+    if (done) { DRAFT.lines = DRAFT.lines.filter(L => !lines.slice(0, done).includes(L)); renderLines(); }
+    toast((done ? `前 ${done} 個已存，` : '') + '儲存失敗：' + e.message);
   }
 }
 
-async function saveCustomer() {
-  const btn = document.getElementById('saveCustBtn');
-  btn.disabled = true;
-  btn.textContent = '儲存中…';
-  const today = new Date().toISOString().slice(0, 10);
-  const data = {
-    'ID': '',
-    '電話': document.getElementById('c_phone').value,
-    '客戶姓名': document.getElementById('c_name').value,
-    'Line名稱': document.getElementById('c_line').value,
-    '口味偏好/備註': document.getElementById('c_note').value,
-    '地址': document.getElementById('c_addr').value,
-    '建檔日期': today,
-  };
+/* ================= 編輯單一品項列 ================= */
+let EDIT = null;
+function openLineEdit(rowIndex) {
+  const r = DB.orders.find(o => o._rowIndex === rowIndex); if (!r) return;
+  EDIT = { r, manTotal: Math.round(num(r['價位']) * num(r['斤數'])) !== Math.round(num(r['總金額'])), manProfit:false };
+  const f = (id, label, v, extra = '') => `<div class="fld"><label>${label}</label><input class="in num" type="number" inputmode="decimal" id="e_${id}" value="${esc(v)}" oninput="${extra}calcEdit()"></div>`;
+  openSheet(`
+    <div class="sheet-h"><h2>編輯品項</h2><button onclick="closeSheet()">取消</button></div>
+    <div class="sheet-b">
+      <div class="grid2">
+        <div class="fld"><label>客戶</label><input class="in" id="e_cust" list="custDL2" value="${esc(r['客戶資料'])}"><datalist id="custDL2">${DB.customers.map(c => `<option value="${esc(c['客戶姓名'])}">`).join('')}</datalist></div>
+        <div class="fld"><label>日期</label><input class="in" type="date" id="e_date" value="${esc(r['日期'])}"></div>
+      </div>
+      <div class="grid2">
+        <div class="fld"><label>品項</label><input class="in" id="e_item" value="${esc(r['品項'])}" oninput="calcEdit()"></div>
+        <div class="fld"><label>產品編號</label><input class="in" id="e_pid" value="${esc(r['產品編號'])}"></div>
+      </div>
+      <div class="grid3">${f('price','價位',r['價位'])}${f('qty','斤數',r['斤數'])}${f('cost','單斤成本',r['單斤成本'])}</div>
+      <div class="grid3">${f('leaf','茶葉消耗',r['茶葉消耗'])}${f('roast','烘焙',r['烘焙'])}${f('deox','脫氧+鋁袋',r['脫氧+鋁袋'])}</div>
+      <div class="grid3">${f('box','箱子',r['箱子'])}${f('ship','運費',r['運費'])}${f('fee','手續費',r['手續費'])}</div>
+      <div class="grid2">${f('total','總金額',r['總金額'],'EDIT.manTotal=true;')}${f('profit','淨利（自動）',r['淨利'],'EDIT.manProfit=true;')}</div>
+      <div class="hint">改任何數字，總金額與淨利會自動重算；直接改淨利則以你填的為準。</div>
+      <div class="grid2">
+        <div class="fld"><label>狀態</label><select class="in" id="e_status">${STATUSES.map(s => `<option ${r['訂單狀態'] === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
+        <div class="fld"><label>備註</label><input class="in" id="e_note" value="${esc(r['備註'])}"></div>
+      </div>
+    </div>
+    <div class="sheet-f"><button class="btn" id="eSave" onclick="saveLineEdit()">儲存變更</button></div>`);
+}
+function calcEdit() {
+  if (!EDIT) return;
+  const v = id => num($('e_' + id).value);
+  if (!EDIT.manTotal && document.activeElement !== $('e_total')) $('e_total').value = Math.round(v('price') * v('qty'));
+  if (EDIT.manProfit || document.activeElement === $('e_profit')) return;
+  const p = lineProfit({ '品項': $('e_item').value, '總金額': v('total'), '茶葉*斤數成本': v('qty') * v('cost'),
+    '茶葉消耗': v('leaf'), '烘焙': v('roast'), '脫氧+鋁袋': v('deox'), '箱子': v('box'), '運費': v('ship'), '手續費': v('fee') });
+  $('e_profit').value = Math.round(p * 10) / 10;
+}
+async function saveLineEdit() {
+  const r = EDIT.r, v = id => num($('e_' + id).value);
+  const data = { ...clean(r),
+    '日期': $('e_date').value, '客戶資料': $('e_cust').value.trim(), '品項': $('e_item').value.trim(), '產品編號': $('e_pid').value.trim(),
+    '價位': v('price'), '斤數': v('qty'), '總金額': v('total'), '單斤成本': v('cost'), '茶葉*斤數成本': Math.round(v('qty') * v('cost') * 100) / 100,
+    '茶葉消耗': v('leaf'), '烘焙': v('roast'), '脫氧+鋁袋': v('deox'), '箱子': v('box'), '運費': v('ship'), '手續費': v('fee'),
+    '淨利': v('profit'), '訂單狀態': $('e_status').value, '備註': $('e_note').value };
+  const b = $('eSave'); b.disabled = true; b.textContent = '儲存中…';
   try {
-    const res = await apiAddRow('客戶資料', data);
-    if (res.error) throw new Error(res.error);
-    showToast('✓ 客戶已新增到 Google Sheets');
-    closeModal();
-    await loadCustomers();
-  } catch (e) {
-    showToast('錯誤：' + e.message);
-    btn.disabled = false;
-    btn.textContent = '儲存客戶';
-  }
+    await updRow(SH.orders, r._rowIndex, data);
+    Object.assign(r, data); saveCache(); renderAll();
+    closeSheet(); toast('已更新');
+  } catch(e) { b.disabled = false; b.textContent = '儲存變更'; toast('更新失敗：' + e.message); }
 }
 
-function calcPurchaseTotal() {
-  const jin   = parseFloat(document.getElementById('p_jin')?.value)   || 0;
-  const price = parseFloat(document.getElementById('p_price')?.value) || 0;
-  const el = document.getElementById('purchaseTotalDisplay');
-  if (el) el.textContent = '$' + Math.round(jin * price).toLocaleString();
+/* ================= 客戶 ================= */
+let CUST_VIEW = [];
+function custStats() {
+  const m = {};
+  activeRows().forEach(r => {
+    const n = r['客戶資料']; if (!n) return;
+    m[n] = m[n] || { total:0, profit:0, dates:new Set(), last:'' };
+    m[n].total += num(r['總金額']); m[n].profit += num(r['淨利']); m[n].dates.add(r['日期']);
+    if (r['日期'] > m[n].last) m[n].last = r['日期'];
+  });
+  return m;
 }
-
-async function savePurchase() {
-  const btn = document.getElementById('savePurchaseBtn');
-  btn.disabled = true;
-  btn.textContent = '儲存中…';
-  const jin   = parseFloat(document.getElementById('p_jin').value)   || 0;
-  const price = parseFloat(document.getElementById('p_price').value) || 0;
-  const data = {
-    '姓名':    document.getElementById('p_name').value,
-    '日期':    document.getElementById('p_date').value,
-    '品項':    document.getElementById('p_item').value,
-    '斤數':    jin,
-    '價錢/斤': price,
-    '總價':    jin * price,
-    '備註':    document.getElementById('p_note').value,
-  };
+function renderCustomers() {
+  const st = custStats();
+  $('cSort').innerHTML = [['recent','最近購買'],['total','消費最多'],['count','次數最多']]
+    .map(([k,l]) => `<button class="chip ${cSort === k ? 'on' : ''}" onclick="cSort='${k}';renderCustomers()">${l}</button>`).join('');
+  const names = new Set([...DB.customers.map(c => c['客戶姓名']), ...Object.keys(st)]);
+  const q = $('cq').value.trim().toLowerCase();
+  let list = [...names].map(n => {
+    const c = DB.customers.find(x => x['客戶姓名'] === n) || { '客戶姓名': n };
+    const s = st[n] || { total:0, profit:0, dates:new Set(), last:'' };
+    return { n, c, total:s.total, count:s.dates.size, last:s.last };
+  });
+  if (q) list = list.filter(x => (x.n + ' ' + (x.c['電話'] || '') + ' ' + (x.c['Line名稱'] || '')).toLowerCase().includes(q));
+  list.sort(cSort === 'total' ? (a,b) => b.total - a.total : cSort === 'count' ? (a,b) => b.count - a.count : (a,b) => b.last.localeCompare(a.last));
+  CUST_VIEW = list;
+  $('cList').innerHTML = list.length ? `<div class="list">${list.map((x,i) => `
+    <button class="row" onclick="openCustomer(${i})">
+      <div class="m"><div class="t">${esc(x.n)}</div><div class="s">${x.last ? '最近 ' + x.last.replace(/-/g,'/') : '尚無訂單'}${x.c['電話'] ? '　' + esc(x.c['電話']) : ''}</div></div>
+      <div class="r"><b class="num">${money(x.total)}</b><small style="color:var(--ink-3)">${x.count} 次</small></div>
+    </button>`).join('')}</div>` : `<div class="empty">${DB.customers.length ? '找不到這位客戶' : '載入中…'}</div>`;
+}
+function openCustomer(i) {
+  const x = CUST_VIEW[i]; if (!x) return;
+  const ships = shipments(DB.orders.filter(r => r['客戶資料'] === x.n)); SHIPS = ships;
+  const favs = {};
+  ships.forEach(s => s.rows.forEach(r => { if (r['訂單狀態'] === '取消') return; const k = itemKey(r['品項']); favs[k] = favs[k] || { n:r['品項'], q:0 }; favs[k].q += num(r['斤數']); }));
+  const fav = Object.values(favs).sort((a,b) => b.q - a.q).slice(0,3);
+  openSheet(`
+    <div class="sheet-h"><h2>${esc(x.n)}</h2><button onclick="closeSheet()">關閉</button></div>
+    <div class="sheet-b">
+      <div class="box">
+        <div class="kv"><span>累計消費</span><b class="num">${money(x.total)}</b></div>
+        <div class="kv"><span>購買次數</span><b>${x.count} 次</b></div>
+        ${fav.length ? `<div class="kv"><span>常買</span><b style="font-weight:500">${fav.map(f => esc(f.n)).join('、')}</b></div>` : ''}
+        ${x.c['電話'] ? `<div class="kv"><span>電話</span><a href="tel:${esc(x.c['電話'])}" style="color:var(--leaf)">${esc(x.c['電話'])}</a></div>` : ''}
+        ${x.c['Line名稱'] ? `<div class="kv"><span>Line</span><b style="font-weight:500">${esc(x.c['Line名稱'])}</b></div>` : ''}
+        ${x.c['地址'] ? `<div class="kv"><span>地址</span><b style="font-weight:500;text-align:right;max-width:70%">${esc(x.c['地址'])}</b></div>` : ''}
+        ${x.c['口味偏好/備註'] ? `<div class="kv"><span>偏好</span><b style="font-weight:500;text-align:right;max-width:70%">${esc(x.c['口味偏好/備註'])}</b></div>` : ''}
+      </div>
+      <button class="btn" onclick="openOrderForm({cust:CUST_VIEW[${i}].n})">幫他新增訂單</button>
+      ${x.c._rowIndex ? `<button class="btn ghost" onclick="openCustomerForm(${x.c._rowIndex})">編輯客戶資料</button>` : ''}
+      <div class="sec-t">購買紀錄</div>
+      <div class="list">${ships.length ? ships.map(s => shipRow(s)).join('') : '<div class="empty">尚無訂單</div>'}</div>
+    </div>`);
+}
+function openCustomerForm(rowIndex) {
+  const c = rowIndex ? DB.customers.find(x => x._rowIndex === rowIndex) : {};
+  const f = (k, label, type = 'text', ph = '') => `<div class="fld"><label>${label}</label><input class="in" id="c_${k}" type="${type}" value="${esc(c[k])}" placeholder="${ph}"></div>`;
+  openSheet(`
+    <div class="sheet-h"><h2>${rowIndex ? '編輯客戶' : '新增客戶'}</h2><button onclick="closeSheet()">取消</button></div>
+    <div class="sheet-b">
+      <div class="fld"><label>客戶姓名</label><input class="in" id="c_name" value="${esc(c['客戶姓名'])}"></div>
+      ${f('電話','電話','tel')}${f('Line名稱','Line 名稱')}${f('地址','地址')}${f('口味偏好/備註','口味偏好／備註','text','例：喜歡輕焙')}
+      ${rowIndex ? '<div class="hint">改名字不會自動改到舊訂單上的名字。</div>' : ''}
+    </div>
+    <div class="sheet-f"><button class="btn" id="cSave" onclick="saveCustomer(${rowIndex || 0})">儲存客戶</button>
+      ${rowIndex ? `<button class="btn danger" onclick="deleteCustomer(${rowIndex})">刪除客戶</button>` : ''}</div>`);
+}
+async function saveCustomer(rowIndex) {
+  const name = $('c_name').value.trim(); if (!name) { toast('請填姓名'); return; }
+  if (DB.customers.some(x => x['客戶姓名'] === name && x._rowIndex !== rowIndex)) { toast('已經有同名客戶'); return; }
+  const old = rowIndex ? DB.customers.find(x => x._rowIndex === rowIndex) : null;
+  const data = { ...(old ? clean(old) : { 'ID': rid(), '建檔日期': today() }), '客戶姓名': name };
+  ['電話','Line名稱','地址','口味偏好/備註'].forEach(k => data[k] = $('c_' + k).value.trim());
+  const b = $('cSave'); b.disabled = true; b.textContent = '儲存中…';
   try {
-    const res = await apiAddRow('茶乾購買', data);
-    if (res.error) throw new Error(res.error);
-    showToast('✓ 茶乾購買已新增到 Google Sheets');
-    closeModal();
-    purchaseLoaded = false;
-    await loadPurchase();
-  } catch (e) {
-    showToast('錯誤：' + e.message);
-    btn.disabled = false;
-    btn.textContent = '儲存購買紀錄';
-  }
+    rowIndex ? await updRow(SH.cust, rowIndex, data) : await addRow(SH.cust, data);
+    closeSheet(); toast('已儲存客戶');
+    DB.customers = (await getAll(SH.cust)).filter(r => String(r['客戶姓名'] || '').trim());
+    saveCache(); renderCustomers();
+  } catch(e) { b.disabled = false; b.textContent = '儲存客戶'; toast('儲存失敗：' + e.message); }
+}
+async function deleteCustomer(rowIndex) {
+  const c = DB.customers.find(x => x._rowIndex === rowIndex);
+  if (!confirm(`刪除客戶「${c ? c['客戶姓名'] : ''}」？訂單紀錄不會被刪除。`)) return;
+  try {
+    await delRow(SH.cust, rowIndex); closeSheet(); toast('已刪除');
+    DB.customers = (await getAll(SH.cust)).filter(r => String(r['客戶姓名'] || '').trim());
+    saveCache(); renderCustomers();
+  } catch(e) { toast('刪除失敗：' + e.message); }
 }
 
-// 初始化：先檢查登入狀態
-checkSavedLogin();
+/* ================= 統計 ================= */
+async function renderStats() {
+  const years = [...new Set(DB.orders.map(r => r['日期'].slice(0,4)).filter(y => /^\d{4}$/.test(y)))].sort().reverse();
+  if (!statYear) statYear = years[0] || String(new Date().getFullYear());
+  const rows = activeRows().filter(r => statYear === 'all' || r['日期'].startsWith(statYear));
+  const rev = rows.reduce((a,r) => a + num(r['總金額']), 0);
+  const pro = rows.reduce((a,r) => a + num(r['淨利']), 0);
+  const tea = rows.filter(r => !isBagName(r['品項'])).reduce((a,r) => a + num(r['斤數']), 0);
+  const bags = rows.filter(r => isBagName(r['品項'])).reduce((a,r) => a + num(r['斤數']), 0);
+  // 品項合併：不分大小寫、忽略空白
+  const im = {};
+  rows.forEach(r => {
+    const k = itemKey(r['品項']); if (!k) return;
+    im[k] = im[k] || { names:{}, q:0, t:0, p:0 };
+    im[k].names[r['品項']] = (im[k].names[r['品項']] || 0) + 1;
+    im[k].q += num(r['斤數']); im[k].t += num(r['總金額']); im[k].p += num(r['淨利']);
+  });
+  const items = Object.values(im).map(x => ({ ...x, n: Object.entries(x.names).sort((a,b) => b[1] - a[1])[0][0], variants: Object.keys(x.names).length })).sort((a,b) => b.t - a.t);
+  const imax = Math.max(1, ...items.map(x => x.t));
+  const cm = {};
+  rows.forEach(r => { const n = r['客戶資料']; if (!n) return; cm[n] = (cm[n] || 0) + num(r['總金額']); });
+  const custs = Object.entries(cm).sort((a,b) => b[1] - a[1]).slice(0, 10);
+  const cmax = Math.max(1, ...custs.map(x => x[1]));
+
+  $('p-stats').innerHTML = `
+    <div class="chips">${[...years, 'all'].map(y => `<button class="chip ${statYear === y ? 'on' : ''}" onclick="statYear='${y}';renderStats()">${y === 'all' ? '全部' : y}</button>`).join('')}</div>
+    <div class="kpis" style="margin-top:6px">
+      <div class="kpi"><span>營業額</span><b class="num">${money(rev)}</b></div>
+      <div class="kpi"><span>淨利</span><b class="num" style="color:var(--leaf)">${money(pro)}</b></div>
+      <div class="kpi"><span>利潤率</span><b class="num">${rev ? (pro / rev * 100).toFixed(1) : 0}%</b></div>
+      <div class="kpi"><span>茶葉／茶包</span><b class="num" style="font-size:16px">${+tea.toFixed(2)} 斤／${+bags.toFixed(0)}</b></div>
+    </div>
+    <div class="sec-t">品項排行（依金額）</div>
+    <div class="list">${items.length ? items.map((x,i) => `
+      <div class="rank"><span class="n">${i+1}</span>
+        <div class="nm"><div>${esc(x.n)}${isBagName(x.n) ? '<span class="tag b">茶包</span>' : ''}</div>
+          <small class="num">${+x.q.toFixed(3)} ${isBagName(x.n) ? '' : '斤'}　淨利 ${money(x.p)}${x.variants > 1 ? `　含 ${x.variants} 種寫法` : ''}</small>
+          <div class="track"><i style="width:${x.t / imax * 100}%"></i></div></div>
+        <span class="v num">${money(x.t)}</span></div>`).join('') : '<div class="empty">這段期間沒有訂單</div>'}</div>
+    <div class="sec-t">客戶排行（前 10）</div>
+    <div class="list">${custs.map(([n,t],i) => `
+      <div class="rank"><span class="n">${i+1}</span><div class="nm"><div>${esc(n)}</div><div class="track"><i style="width:${t / cmax * 100}%"></i></div></div><span class="v num">${money(t)}</span></div>`).join('') || '<div class="empty">—</div>'}</div>
+    <div class="sec-t">年度報表（Google Sheets）</div>
+    <div id="annualBox"><div class="loading">讀取中…</div></div>`;
+  loadAnnual();
+}
+async function loadAnnual() {
+  try {
+    if (!DB.annual.length) DB.annual = (await getAll(SH.annual)).filter(r => /^\d{4}/.test(String(r['年度'] || '')));
+    const cols = ['總營業額','總利潤','總利潤率','年度茶葉銷量','年度茶包銷量','年度購買總斤數','購買總金額'];
+    const fmt = (k, v) => k === '總利潤率' ? (num(v) <= 1 ? (num(v) * 100).toFixed(1) : num(v).toFixed(1)) + '%' : k.includes('金額') || k.includes('營業') || k.includes('利潤') ? money(v) : (+num(v).toFixed(2)).toLocaleString();
+    const box = $('annualBox'); if (!box) return;
+    box.innerHTML = DB.annual.length ? `<div class="tbl-w"><table><tr><th>年度</th>${cols.map(c => `<th>${c.replace('年度','').replace('總','')}</th>`).join('')}</tr>
+      ${DB.annual.map(r => `<tr><td>${esc(String(r['年度']).slice(0,4))}</td>${cols.map(c => `<td class="num">${fmt(c, r[c])}</td>`).join('')}</tr>`).join('')}</table></div>` : '<div class="empty">年度報表是空的</div>';
+  } catch(e) { const box = $('annualBox'); if (box) box.innerHTML = `<div class="err">年度報表讀取失敗：${esc(e.message)}</div>`; }
+}
+
+/* ================= 茶乾進貨 ================= */
+let BUY_VIEW = [];
+function renderPurchases() {
+  const q = $('bq').value.trim().toLowerCase();
+  let list = DB.purchases.map(r => ({ r, d: normDate(r['日期']) }));
+  if (q) list = list.filter(x => (x.r['姓名'] + ' ' + x.r['品項'] + ' ' + (x.r['備註'] || '')).toLowerCase().includes(q));
+  list.sort((a,b) => b.d.localeCompare(a.d) || b.r._rowIndex - a.r._rowIndex);
+  BUY_VIEW = list;
+  const y = String(new Date().getFullYear());
+  const yl = DB.purchases.filter(r => normDate(r['日期']).startsWith(y));
+  const yj = yl.reduce((a,r) => a + num(r['斤數']), 0), yt = yl.reduce((a,r) => a + (num(r['總價']) || num(r['斤數']) * num(r['價錢/斤'])), 0);
+  $('bList').innerHTML = `
+    <div class="kpis" style="margin-bottom:12px"><div class="kpi"><span>${y} 年進貨</span><b class="num">${(+yj.toFixed(2)).toLocaleString()} 斤</b></div><div class="kpi"><span>${y} 年金額</span><b class="num">${money(yt)}</b></div></div>
+    ${list.length ? `<div class="list">${list.map((x,i) => `
+      <button class="row" onclick="openPurchaseForm(${i})">
+        <div class="m"><div class="t">${esc(x.r['品項'] || '（未填品項）')}</div><div class="s">${esc(x.r['姓名'])}　${esc(x.d.replace(/-/g,'/'))}　${num(x.r['斤數'])} 斤 × ${num(x.r['價錢/斤'])}</div></div>
+        <div class="r"><b class="num">${money(num(x.r['總價']) || num(x.r['斤數']) * num(x.r['價錢/斤']))}</b></div>
+      </button>`).join('')}</div>` : `<div class="empty">${DB.purchases.length ? '沒有符合的紀錄' : '還沒有進貨紀錄'}</div>`}`;
+}
+function openPurchaseForm(i) {
+  const r = i !== undefined ? BUY_VIEW[i].r : null;
+  const d = new Date(), defDate = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()}`;
+  openSheet(`
+    <div class="sheet-h"><h2>${r ? '編輯進貨' : '新增進貨'}</h2><button onclick="closeSheet()">取消</button></div>
+    <div class="sheet-b">
+      <div class="grid2">
+        <div class="fld"><label>供應商</label><input class="in" id="b_name" value="${esc(r ? r['姓名'] : '')}" placeholder="例：民"></div>
+        <div class="fld"><label>日期</label><input class="in" id="b_date" value="${esc(r ? r['日期'] : defDate)}"></div>
+      </div>
+      <div class="fld"><label>品項</label><input class="in" id="b_item" value="${esc(r ? r['品項'] : '')}"></div>
+      <div class="grid2">
+        <div class="fld"><label>斤數</label><input class="in num" type="number" inputmode="decimal" id="b_jin" value="${r ? num(r['斤數']) : ''}" oninput="calcBuy()"></div>
+        <div class="fld"><label>價錢/斤</label><input class="in num" type="number" inputmode="decimal" id="b_price" value="${r ? num(r['價錢/斤']) : ''}" oninput="calcBuy()"></div>
+      </div>
+      <div class="fld"><label>備註</label><input class="in" id="b_note" value="${esc(r ? r['備註'] : '')}"></div>
+    </div>
+    <div class="sheet-f"><div class="sum"><div><span>總價</span><b class="num" id="b_total">$0</b></div></div>
+      <button class="btn gold" id="bSave" onclick="savePurchase(${r ? r._rowIndex : 0})">儲存進貨</button>
+      ${r ? `<button class="btn danger" onclick="deletePurchase(${r._rowIndex})">刪除</button>` : ''}</div>`);
+  calcBuy();
+}
+function calcBuy() { $('b_total').textContent = money(num($('b_jin').value) * num($('b_price').value)); }
+async function savePurchase(rowIndex) {
+  const data = { '姓名': $('b_name').value.trim(), '日期': $('b_date').value.trim(), '品項': $('b_item').value.trim(),
+    '斤數': num($('b_jin').value), '價錢/斤': num($('b_price').value), '總價': num($('b_jin').value) * num($('b_price').value), '備註': $('b_note').value.trim() };
+  if (!data['品項'] || !data['斤數']) { toast('請填品項與斤數'); return; }
+  const b = $('bSave'); b.disabled = true; b.textContent = '儲存中…';
+  try {
+    rowIndex ? await updRow(SH.buy, rowIndex, data) : await addRow(SH.buy, data);
+    closeSheet(); toast('已儲存進貨');
+    setPurchases(await getAll(SH.buy)); saveCache(); renderPurchases();
+  } catch(e) { b.disabled = false; b.textContent = '儲存進貨'; toast('儲存失敗：' + e.message); }
+}
+async function deletePurchase(rowIndex) {
+  if (!confirm('刪除這筆進貨紀錄？')) return;
+  try { await delRow(SH.buy, rowIndex); closeSheet(); toast('已刪除'); setPurchases(await getAll(SH.buy)); saveCache(); renderPurchases(); }
+  catch(e) { toast('刪除失敗：' + e.message); }
+}
+
+/* ================= 設定（存在這支手機） ================= */
+function openSettings() {
+  const f = (k, label) => `<div class="fld"><label>${label}</label><input class="in num" id="s_${k}" type="number" inputmode="decimal" value="${esc(SET[k])}"></div>`;
+  const t = (k, label) => `<div class="fld"><label>${label}</label><input class="in" id="s_${k}" value="${esc(SET[k])}" inputmode="decimal"></div>`;
+  openSheet(`
+    <div class="sheet-h"><h2>設定</h2><button onclick="closeSheet()">關閉</button></div>
+    <div class="sheet-b">
+      <div class="box-t">每斤固定成本（一般茶自動帶入）</div>
+      <div class="grid3">${f('leaf','茶葉消耗')}${f('roast','烘焙')}${f('deox','脫氧+鋁袋')}</div>
+      <div class="box-t" style="margin-top:8px">快速按鈕（用逗號分隔）</div>
+      ${t('boxChips','箱子')}${t('shipChips','運費')}${t('feeChips','手續費')}
+      <div class="hint">設定只存在這支手機（或這台電腦）上，不會寫進 Google Sheets；改了只影響之後新增的訂單。</div>
+      <button class="btn" onclick="saveSettings()">儲存設定</button>
+      <button class="btn danger" onclick="if(confirm('登出並清除這支手機上的暫存資料？')){localStorage.removeItem('${CACHE_KEY}');requireLogin();location.reload()}">登出</button>
+    </div>`);
+}
+function saveSettings() {
+  ['leaf','roast','deox'].forEach(k => SET[k] = num($('s_' + k).value));
+  ['boxChips','shipChips','feeChips'].forEach(k => SET[k] = chipList($('s_' + k).value).join(','));
+  try { localStorage.setItem(SET_KEY, JSON.stringify(SET)); } catch(e) {}
+  closeSheet(); toast('設定已儲存');
+}
+
+/* ================= 抽屜 ================= */
+function openSheet(html) { $('sheet').innerHTML = html; $('sheetBg').classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeSheet() { $('sheetBg').classList.remove('open'); document.body.style.overflow = ''; EDIT = null; }
+
+/* ================= 啟動 ================= */
+(function init() {
+  let saved = null;
+  try { saved = localStorage.getItem('songfa_pwhash'); } catch(e) {}
+  const t = loadCache();
+  renderAll();
+  if (t) setSync('ok', t);
+  if (!saved) { $('login').classList.add('open'); return; }
+  PW = saved;
+  refreshAll();
+})();
 </script>
 </body>
 </html>
